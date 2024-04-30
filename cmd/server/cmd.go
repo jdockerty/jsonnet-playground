@@ -38,6 +38,7 @@ func main() {
 
 	http.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
+			log.Println("Received non-POST from", r.RemoteAddr)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte("Must be POST"))
 			return
@@ -60,7 +61,8 @@ func main() {
 			return
 		}
 
-		fmt.Println(evaluated)
+		log.Printf("Snippet:\n%s\n", evaluated)
+		w.Write([]byte(evaluated))
 	})
 
 	log.Printf("Listening on %s\n", bindAddress)
