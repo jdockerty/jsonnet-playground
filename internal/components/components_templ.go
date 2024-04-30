@@ -10,7 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
-func Page(global, session int) templ.Component {
+import "github.com/hashicorp/golang-lru/v2/expirable"
+import "net/http"
+
+func Page(req *http.Request, cache *expirable.LRU[string, string]) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -23,7 +26,7 @@ func Page(global, session int) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Jsonnet Playground</title><link rel=\"stylesheet\" href=\"/assets/style.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\" integrity=\"sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2\" crossorigin=\"anonymous\"></script></head><body class=\"bg-gray-100\"><header class=\"hero is-primary\"><div class=\"hero-body\"><div class=\"container\"><h1 class=\"title\">Jsonnet Playground</h1></div></div></header><div class=\"jsonnet-editor\" id=\"jsonnet-container\"><form id=\"jsonnet-form\"><textarea name=\"jsonnet-input\" id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"></textarea> <button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button></form><div class=\"jsonnet-output\"><textarea id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Jsonnet Playground</title><link rel=\"stylesheet\" href=\"/assets/style.css\"><script src=\"https://unpkg.com/htmx.org@1.9.12\" integrity=\"sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2\" crossorigin=\"anonymous\"></script></head><body class=\"bg-gray-100\"><header class=\"hero is-primary\"><div class=\"hero-body\"><div class=\"container\"><h1 class=\"title\">Jsonnet Playground</h1></div></div></header><div class=\"jsonnet-editor\" id=\"jsonnet-container\"><form id=\"jsonnet-form\"><textarea name=\"jsonnet-input\" id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"></textarea> <button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button> <button type=\"submit\" hx-post=\"/api/share\" hx-target=\"#share-output\">Share</button><div class=\"share-container\"><p id=\"share-output\"></p></div></form><div class=\"jsonnet-output\"><textarea id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

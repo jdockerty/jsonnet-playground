@@ -1,6 +1,9 @@
 package components
 
-templ Page(global, session int) {
+import "github.com/hashicorp/golang-lru/v2/expirable"
+import "net/http"
+
+templ Page(req *http.Request, cache *expirable.LRU[string, string]) {
 	<html>
 		<head>
 			<meta charset="UTF-8"/>
@@ -27,6 +30,16 @@ templ Page(global, session int) {
                     >
                     Run
                     </button>
+                    <button
+                        type="submit"
+                        hx-post="/api/share"
+                        hx-target="#share-output"
+                    >
+                    Share
+                    </button>
+                    <div class="share-container">
+                    <p id="share-output"></p>
+                    </div>
                 </form>
                 <div class="jsonnet-output">
                     <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
