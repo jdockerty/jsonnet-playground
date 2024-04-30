@@ -8,7 +8,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/a-h/templ"
 	"github.com/google/go-jsonnet"
+	"github.com/jdockerty/jsonnet-playground/internal/static"
 )
 
 var (
@@ -35,6 +37,9 @@ func main() {
 	// GET /api/share/<id>. Retrieve shared snippet hash, display in UI
 	// POST /api/run <encoded-data>. Load snippet and eval with Jsonnet VM
 	// POST /api/share <encoded-data>. Share code snippet, returns hash
+
+	component := static.Hello("Jack")
+	http.Handle("/", templ.Handler(component))
 
 	http.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
