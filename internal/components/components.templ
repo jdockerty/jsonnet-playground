@@ -1,32 +1,5 @@
 package components
 
-import "strconv"
-
-css border() {
-	border: 1px solid #eeeeee;
-	border-radius: 4px;
-	margin: 10px;
-	padding-top: 30px;
-	padding-bottom: 30px;
-}
-
-templ counts(global, session int) {
-	<form id="countsForm" action="/" method="POST" hx-post="/run" hx-select="#countsForm" hx-swap="outerHTML">
-		<div class="columns">
-			<div class={ "column", "has-text-centered", "is-primary", border }>
-				<h1 class="title is-size-1 has-text-centered">{ strconv.Itoa(global) }</h1>
-				<p class="subtitle has-text-centered">Global</p>
-				<div><button class="button is-primary" type="submit" name="global" value="global">+1</button></div>
-			</div>
-			<div class={ "column", "has-text-centered", border }>
-				<h1 class="title is-size-1 has-text-centered">{ strconv.Itoa(session) }</h1>
-				<p class="subtitle has-text-centered">Session</p>
-				<div><button class="button is-secondary" type="submit" name="session" value="session">+1</button></div>
-			</div>
-		</div>
-	</form>
-}
-
 templ Page(global, session int) {
 	<html>
 		<head>
@@ -44,11 +17,20 @@ templ Page(global, session int) {
 					</div>
 				</div>
 			</header>
-            <div class="jsonnet-editor">
-                <form id="jsonnet-input">
-                <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
-                <button type="submit" hx-post="/api/run"> Run </button>
+            <div class="jsonnet-editor" id="jsonnet-container">
+                <form id="jsonnet-form">
+                    <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
+                    <button
+                        type="submit"
+                        hx-post="/api/run"
+                        hx-target="#jsonnet-output-container"
+                    >
+                    Run
+                    </button>
                 </form>
+                <div class="jsonnet-output">
+                    <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
+                </div>
             </div>
 		</body>
 	</html>
