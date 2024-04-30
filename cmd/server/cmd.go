@@ -1,30 +1,42 @@
 package main
 
 import (
+	"context"
+	"crypto/sha512"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/google/go-jsonnet"
+	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/jdockerty/jsonnet-playground/internal/components"
 )
 
 var (
-	host string
-	port int
+	host         string
+	port         int
+	cacheSize    int
+	shareAddress string
 )
 
 func init() {
 	flag.StringVar(&host, "host", "127.0.0.1", "Host address to bind to")
+	flag.StringVar(&shareAddress, "share-domain", "http://127.0.0.1", "Address prefix when sharing snippets")
 	flag.IntVar(&port, "port", 6000, "Port binding for the server")
+	flag.IntVar(&cacheSize, "cache-size", 1000, "Expirable LRU cache size")
 	flag.Parse()
 }
 
 func main() {
 	bindAddress := fmt.Sprintf("%s:%d", host, port)
 	vm := jsonnet.MakeVM()
+
+	cache := expirable.NewLRU[string, string](cacheSize, nil, time.Minute*2)
+	hasher := sha512.New()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
