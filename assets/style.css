@@ -35,6 +35,8 @@ h1 {
     gap: 20px;
     padding: 20px;
     background-color: #2c2c2c;
+    height: 75%;
+    width: 75%;
 }
 
 #jsonnet-form, .jsonnet-output {
@@ -44,6 +46,7 @@ h1 {
 textarea {
     width: 100%;
     min-height: 300px;
+    height: 80%;
     background-color: #333;
     color: #ccc;
     border: 1px solid #555;
