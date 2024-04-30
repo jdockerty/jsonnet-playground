@@ -56,7 +56,9 @@ func main() {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		evaluated, fmtErr := vm.EvaluateAnonymousSnippet("", incomingJsonnet)
 		if fmtErr != nil {
-			http.Error(w, fmtErr.Error(), 400)
+			errMsg := fmt.Errorf("Invalid Jsonnet: %w", fmtErr)
+			// TODO: display an error for the bad req rather than using a 200
+			w.Write([]byte(errMsg.Error()))
 			return
 		}
 
