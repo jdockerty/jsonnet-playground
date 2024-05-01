@@ -48,13 +48,19 @@ func main() {
 	// POST /api/run <encoded-data>. Load snippet and eval with Jsonnet VM
 	// POST /api/share <encoded-data>. Share code snippet, returns hash
 
-	mainPage := components.Page(nil, cache)
+	rootPage := components.RootPage()
 	fs := http.FileServer(http.Dir("assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets", fs))
-	http.Handle("/", templ.Handler(mainPage))
+	http.Handle("/", templ.Handler(rootPage))
 	http.HandleFunc("/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Share render", r.PathValue("shareHash"))
-		mainPage.Render(context.TODO(), w)
+		shareHash := r.PathValue("shareHash")
+
+		if shareHash == "" {
+			log.Println("Browsed to share with no hash, rendering root page")
+			rootPage.Render(context.Background(), w)
+			return
+		}
+		rootPage.Render(context.TODO(), w)
 	})
 
 	http.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
@@ -80,6 +86,23 @@ func main() {
 
 		log.Printf("Snippet:\n%s\n", evaluated)
 		w.Write([]byte(evaluated))
+	})
+	http.HandleFunc("/api/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "must be GET", 400)
+			return
+		}
+
+		shareHash := r.PathValue("shareHash")
+
+		_, ok := cache.Get(shareHash)
+		if !ok {
+			errMsg := fmt.Errorf("No share snippet exists for %s\n", shareHash)
+			w.Write([]byte(errMsg.Error()))
+			return
+		}
+		log.Printf("Loading shared snippet for %s\n", shareHash)
+		rootPage.Render(context.TODO(), w)
 	})
 
 	http.HandleFunc("/api/share", func(w http.ResponseWriter, r *http.Request) {
