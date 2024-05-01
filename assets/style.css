@@ -73,3 +73,11 @@
  button:hover {
      background-color: #45a049;
 }
+
+footer {
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    text-align: center;
+    flex-shrink: 0;
+}
