@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/a-h/templ"
@@ -53,7 +54,7 @@ func main() {
 	// POST /api/share <encoded-data>. Share code snippet, returns hash
 
 	rootPage := components.RootPage()
-	fs := http.FileServer(http.Dir("assets"))
+	fs := http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH")))
 	http.Handle("/assets/", http.StripPrefix("/assets", fs))
 	http.Handle("/", templ.Handler(rootPage))
 	http.HandleFunc("/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
