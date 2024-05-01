@@ -34,8 +34,8 @@ jobs:
       - name: Push main branch to GHCR
         if: github.ref_name == 'main'
         run: |
-          ko build -B --platform linux/amd64,linux/arm/v8,linux/arm64 --tags ${{ github.ref_name }}
+          ko build -B ./cmd/server --platform linux/amd64,linux/arm/v8,linux/arm64 --tags ${{ github.ref_name }}
       - name: Push tag to GHCR
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          ko build -B --platform linux/amd64,linux/arm/v8,linux/arm64 --tags ${{ github.ref_name }}
+          ko build -B ./cmd/server --platform linux/amd64,linux/arm/v8,linux/arm64 --tags ${{ github.ref_name }}
