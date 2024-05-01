@@ -1,94 +1,75 @@
 package components
 
-templ SharePage(snippet string) {
+import "fmt"
+
+templ heading() {
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Jsonnet Playground</title>
+        <link rel="stylesheet" href="/assets/style.css"/>
+        <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+    </head>
+}
+
+templ SharePage(sharedHash string) {
 	<html>
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Jsonnet Playground</title>
-            <link rel="stylesheet" href="/assets/style.css"/>
-            <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
-		</head>
+        @heading()
 		<body class="bg-gray-100">
-			<header class="hero is-primary">
-				<div class="hero-body">
-					<div class="container">
-						<h1 class="title">Jsonnet Playground</h1>
-					</div>
-				</div>
-			</header>
-            <div class="jsonnet-editor" id="jsonnet-container">
-                <form id="jsonnet-form">
-                    <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
-                    <button
-                        type="submit"
-                        hx-post="/api/run"
-                        hx-target="#jsonnet-output-container"
-                    >
-                    Run
-                    </button>
-                    <button
-                        type="submit"
-                        hx-post="/api/share"
-                        hx-target="#share-output"
-                    >
-                    Share
-                    </button>
-                    <div class="share-container">
-                    <p id="share-output"></p>
-                    </div>
-                </form>
-                <div class="jsonnet-output">
-                    <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
-                </div>
-            </div>
+            @title()
+            @jsonnetDisplay(sharedHash)
 		</body>
 	</html>
+}
 
+templ title() {
+    <header class="hero is-primary">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">Jsonnet Playground</h1>
+            </div>
+        </div>
+    </header>
+}
+
+templ jsonnetDisplay(sharedHash string) {
+    <div class="jsonnet-editor" id="jsonnet-container">
+        <form id="jsonnet-form">
+            if sharedHash != "" {
+                <textarea name="jsonnet-input" hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load" placeholder={ fmt.Sprintf("%s", sharedHash) } id="jsonnet-input"></textarea>
+            } else {
+                <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
+            }
+            <button
+                type="submit"
+                hx-post="/api/run"
+                hx-target="#jsonnet-output-container"
+            >
+            Run
+            </button>
+            <button
+                type="submit"
+                hx-post="/api/share"
+                hx-target="#share-output"
+            >
+            Share
+            </button>
+            <div class="share-container">
+            <p id="share-output"></p>
+            </div>
+        </form>
+        <div class="jsonnet-output">
+            <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
+        </div>
+    </div>
 }
 
 templ RootPage() {
 	<html>
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Jsonnet Playground</title>
-            <link rel="stylesheet" href="/assets/style.css"/>
-            <script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
-		</head>
+        @heading()
 		<body class="bg-gray-100">
-			<header class="hero is-primary">
-				<div class="hero-body">
-					<div class="container">
-						<h1 class="title">Jsonnet Playground</h1>
-					</div>
-				</div>
-			</header>
-            <div class="jsonnet-editor" id="jsonnet-container">
-                <form id="jsonnet-form">
-                    <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
-                    <button
-                        type="submit"
-                        hx-post="/api/run"
-                        hx-target="#jsonnet-output-container"
-                    >
-                    Run
-                    </button>
-                    <button
-                        type="submit"
-                        hx-post="/api/share"
-                        hx-target="#share-output"
-                    >
-                    Share
-                    </button>
-                    <div class="share-container">
-                    <p id="share-output"></p>
-                    </div>
-                </form>
-                <div class="jsonnet-output">
-                    <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
-                </div>
-            </div>
+            @title()
+            @jsonnetDisplay("")
 		</body>
 	</html>
 }
