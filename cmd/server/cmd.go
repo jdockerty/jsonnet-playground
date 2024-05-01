@@ -26,7 +26,7 @@ var (
 func init() {
 	flag.StringVar(&host, "host", "127.0.0.1", "Host address to bind to")
 	flag.StringVar(&shareAddress, "share-domain", "http://127.0.0.1", "Address prefix when sharing snippets")
-	flag.IntVar(&port, "port", 6000, "Port binding for the server")
+	flag.IntVar(&port, "port", 8080, "Port binding for the server")
 	flag.IntVar(&cacheSize, "cache-size", 1000, "Expirable LRU cache size")
 	flag.Parse()
 }
