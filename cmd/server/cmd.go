@@ -58,13 +58,16 @@ func main() {
 	http.Handle("/", templ.Handler(rootPage))
 	http.HandleFunc("/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
 		shareHash := r.PathValue("shareHash")
+		log.Printf("Incoming share view for %+v\n", shareHash)
 
 		if shareHash == "" {
 			log.Println("Browsed to share with no hash, rendering root page")
 			rootPage.Render(context.Background(), w)
 			return
 		}
-		rootPage.Render(context.TODO(), w)
+		log.Println("Rendering share page")
+		sharePage := components.SharePage(shareHash)
+		sharePage.Render(context.Background(), w)
 	})
 
 	http.HandleFunc("/api/run", func(w http.ResponseWriter, r *http.Request) {
@@ -91,24 +94,6 @@ func main() {
 		log.Printf("Snippet:\n%s\n", evaluated)
 		w.Write([]byte(evaluated))
 	})
-	http.HandleFunc("/api/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, "must be GET", 400)
-			return
-		}
-
-		shareHash := r.PathValue("shareHash")
-
-		_, ok := cache.Get(shareHash)
-		if !ok {
-			errMsg := fmt.Errorf("No share snippet exists for %s\n", shareHash)
-			w.Write([]byte(errMsg.Error()))
-			return
-		}
-		log.Printf("Loading shared snippet for %s\n", shareHash)
-		rootPage.Render(context.TODO(), w)
-	})
-
 	http.HandleFunc("/api/share", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "must be POST", 400)
@@ -122,23 +107,39 @@ func main() {
 		}
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		evaluated, fmtErr := vm.EvaluateAnonymousSnippet("", incomingJsonnet)
+		_, fmtErr := vm.EvaluateAnonymousSnippet("", incomingJsonnet)
 		if fmtErr != nil {
-			errMsg := fmt.Errorf("Invalid Jsonnet: %w", fmtErr)
 			// TODO: display an error for the bad req rather than using a 200
-			w.Write([]byte(errMsg.Error()))
+			w.Write([]byte("Share is available for invalid Jsonnet\nRun your snippet to see the result."))
 			return
 		}
 
-		snippetHash := hex.EncodeToString(hasher.Sum([]byte(evaluated)))[:15]
+		snippetHash := hex.EncodeToString(hasher.Sum([]byte(incomingJsonnet)))[:15]
 		if _, ok := cache.Get(snippetHash); !ok {
 			log.Printf("%s added to cache", snippetHash)
-			cache.Add(snippetHash, evaluated)
+			cache.Add(snippetHash, incomingJsonnet)
 		} else {
 			log.Printf("cache hit for %s\n", snippetHash)
 		}
 		shareMsg := fmt.Sprintf("Link: %s/share/%s\n", shareAddress, snippetHash)
 		w.Write([]byte(shareMsg))
+	})
+	http.HandleFunc("/api/share/{shareHash}", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "must be GET", 400)
+			return
+		}
+		shareHash := r.PathValue("shareHash")
+		log.Printf("Call to /api/share/%s\n", shareHash)
+
+		snippet, ok := cache.Get(shareHash)
+		if !ok {
+			errMsg := fmt.Errorf("No share snippet exists for %s\n", shareHash)
+			w.Write([]byte(errMsg.Error()))
+			return
+		}
+		log.Printf("Loading shared snippet for %s\n", shareHash)
+		w.Write([]byte(snippet))
 	})
 
 	log.Printf("Listening on %s\n", bindAddress)
