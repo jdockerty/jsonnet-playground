@@ -12,12 +12,21 @@ templ heading() {
     </head>
 }
 
+templ footer() {
+    <footer>
+        <a href="https://github.com/jdockerty/jsonnet-playground" target="_blank">
+            <img src="/assets/img/github-mark-white.svg" alt="GitHub Logo" width="30"/>
+        </a>
+    </footer>
+}
+
 templ SharePage(sharedHash string) {
 	<html>
         @heading()
 		<body class="bg-gray-100">
             @title()
             @jsonnetDisplay(sharedHash)
+            @footer()
 		</body>
 	</html>
 }
@@ -70,6 +79,7 @@ templ RootPage() {
 		<body class="bg-gray-100">
             @title()
             @jsonnetDisplay("")
+            @footer()
 		</body>
 	</html>
 }
