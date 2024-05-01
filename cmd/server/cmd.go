@@ -21,6 +21,10 @@ var (
 	port         int
 	cacheSize    int
 	shareAddress string
+
+	// In-memory store for single running instance of the application.
+	// TODO: multiple replicas will require a separate persistence layer.
+	cache *expirable.LRU[string, string]
 )
 
 func init() {
@@ -35,7 +39,7 @@ func main() {
 	bindAddress := fmt.Sprintf("%s:%d", host, port)
 	vm := jsonnet.MakeVM()
 
-	cache := expirable.NewLRU[string, string](cacheSize, nil, time.Minute*2)
+	cache = expirable.NewLRU[string, string](cacheSize, nil, time.Minute*2)
 	hasher := sha512.New()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
