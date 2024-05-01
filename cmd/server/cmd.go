@@ -18,10 +18,11 @@ import (
 )
 
 var (
-	host         string
-	port         int
-	cacheSize    int
-	shareAddress string
+	host           string
+	port           int
+	cacheSize      int
+	shareAddress   string
+	expiryDuration time.Duration
 
 	// In-memory store for single running instance of the application.
 	// TODO: multiple replicas will require a separate persistence layer.
@@ -33,6 +34,7 @@ func init() {
 	flag.StringVar(&shareAddress, "share-domain", "http://127.0.0.1", "Address prefix when sharing snippets")
 	flag.IntVar(&port, "port", 8080, "Port binding for the server")
 	flag.IntVar(&cacheSize, "cache-size", 1000, "Expirable LRU cache size")
+	flag.DurationVar(&expiryDuration, "expiry", time.Minute*30, "TTL of cache entries in the LRU")
 	flag.Parse()
 }
 
@@ -40,7 +42,7 @@ func main() {
 	bindAddress := fmt.Sprintf("%s:%d", host, port)
 	vm := jsonnet.MakeVM()
 
-	cache = expirable.NewLRU[string, string](cacheSize, nil, time.Minute*2)
+	cache = expirable.NewLRU[string, string](cacheSize, nil, expiryDuration)
 	hasher := sha512.New()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
