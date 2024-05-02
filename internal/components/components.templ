@@ -47,7 +47,7 @@ templ jsonnetDisplay(sharedHash string) {
             if sharedHash != "" {
                 <textarea name="jsonnet-input" hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load" placeholder={ fmt.Sprintf("%s", sharedHash) } id="jsonnet-input"></textarea>
             } else {
-                <textarea name="jsonnet-input" id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
+                <textarea name="jsonnet-input" autofocus id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
             }
             <button
                 type="submit"

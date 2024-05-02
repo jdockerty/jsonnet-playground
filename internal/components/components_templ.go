@@ -181,7 +181,7 @@ func jsonnetDisplay(sharedHash string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<textarea name=\"jsonnet-input\" id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"></textarea> ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<textarea name=\"jsonnet-input\" autofocus id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"></textarea> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
