@@ -40,12 +40,6 @@ func main() {
 		w.Write([]byte("OK"))
 	})
 
-	// Endpoints
-	//
-	// GET /api/share/<id>. Retrieve shared snippet hash, display in UI
-	// POST /api/run <encoded-data>. Load snippet and eval with Jsonnet VM
-	// POST /api/share <encoded-data>. Share code snippet, returns hash
-
 	rootPage := components.RootPage()
 	fs := http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH")))
 	http.Handle("/assets/", routes.HandleAssets("/assets/", fs))

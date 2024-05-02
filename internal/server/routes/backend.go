@@ -6,14 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/google/go-jsonnet"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
-var (
-	vm = jsonnet.MakeVM()
-)
-
+// HandleRun receives Jsonnet input via text and evaluates it.
 func HandleRun(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -41,6 +37,11 @@ func HandleRun(state *state.State) http.HandlerFunc {
 	}
 }
 
+// HandleCreateShare is used to create shared snippets.
+// This is handled through creating a hash of the input and adding it to the state
+// store - this storage mechanism is ephemeral.
+//
+// At a later date, this will include a persistence layer.
 func HandleCreateShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
@@ -75,6 +76,8 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 	}
 }
 
+// HandleGetShare attempts to retrieve a shared snippet hash from the internal
+// store. If this does not exist, an error is displayed.
 func HandleGetShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {

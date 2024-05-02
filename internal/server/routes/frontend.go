@@ -9,10 +9,12 @@ import (
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
+// HandleAssets wires up the static asset handling for the server.
 func HandleAssets(pattern string, fsHandler http.Handler) http.Handler {
 	return http.StripPrefix(pattern, fsHandler)
 }
 
+// HandleShare is the rendering of the shared snippet view.
 func HandleShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		shareHash := r.PathValue("shareHash")
