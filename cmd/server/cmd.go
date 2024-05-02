@@ -13,27 +13,23 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/google/go-jsonnet"
-	"github.com/hashicorp/golang-lru/v2/expirable"
 	"github.com/jdockerty/jsonnet-playground/internal/components"
 )
 
 var (
 	host           string
 	port           int
-	cacheSize      int
 	shareAddress   string
 	expiryDuration time.Duration
 
 	// In-memory store for single running instance of the application.
-	// TODO: multiple replicas will require a separate persistence layer.
-	cache *expirable.LRU[string, string]
+	cache map[string]string
 )
 
 func init() {
 	flag.StringVar(&host, "host", "127.0.0.1", "Host address to bind to")
 	flag.StringVar(&shareAddress, "share-domain", "http://127.0.0.1", "Address prefix when sharing snippets")
 	flag.IntVar(&port, "port", 8080, "Port binding for the server")
-	flag.IntVar(&cacheSize, "cache-size", 1000, "Expirable LRU cache size")
 	flag.DurationVar(&expiryDuration, "expiry", time.Minute*30, "TTL of cache entries in the LRU")
 	flag.Parse()
 }
@@ -42,7 +38,7 @@ func main() {
 	bindAddress := fmt.Sprintf("%s:%d", host, port)
 	vm := jsonnet.MakeVM()
 
-	cache = expirable.NewLRU[string, string](cacheSize, nil, expiryDuration)
+	cache = make(map[string]string)
 	hasher := sha512.New()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -118,9 +114,9 @@ func main() {
 		}
 
 		snippetHash := hex.EncodeToString(hasher.Sum([]byte(incomingJsonnet)))[:15]
-		if _, ok := cache.Get(snippetHash); !ok {
+		if _, ok := cache[snippetHash]; !ok {
 			log.Printf("%s added to cache", snippetHash)
-			cache.Add(snippetHash, incomingJsonnet)
+			cache[snippetHash] = incomingJsonnet
 		} else {
 			log.Printf("cache hit for %s\n", snippetHash)
 		}
@@ -135,9 +131,9 @@ func main() {
 		shareHash := r.PathValue("shareHash")
 		log.Printf("Call to /api/share/%s\n", shareHash)
 
-		snippet, ok := cache.Get(shareHash)
+		snippet, ok := cache[shareHash]
 		if !ok {
-			errMsg := fmt.Errorf("No share snippet exists for %s\n", shareHash)
+			errMsg := fmt.Errorf("No share snippet exists for %s, it might have expired.\n", shareHash)
 			w.Write([]byte(errMsg.Error()))
 			return
 		}
