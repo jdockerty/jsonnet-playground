@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/a-h/templ"
 	"github.com/jdockerty/jsonnet-playground/internal/components"
@@ -15,10 +14,9 @@ import (
 )
 
 var (
-	host           string
-	port           int
-	shareAddress   string
-	expiryDuration time.Duration
+	host         string
+	port         int
+	shareAddress string
 
 	// In-memory store for single running instance of the application.
 	cache map[string]string
@@ -28,7 +26,6 @@ func init() {
 	flag.StringVar(&host, "host", "127.0.0.1", "Host address to bind to")
 	flag.StringVar(&shareAddress, "share-domain", "http://127.0.0.1", "Address prefix when sharing snippets")
 	flag.IntVar(&port, "port", 8080, "Port binding for the server")
-	flag.DurationVar(&expiryDuration, "expiry", time.Minute*30, "TTL of cache entries in the LRU")
 	flag.Parse()
 }
 
