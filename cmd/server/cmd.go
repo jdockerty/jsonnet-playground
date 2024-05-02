@@ -118,7 +118,8 @@ func main() {
 			log.Printf("%s added to cache", snippetHash)
 			cache[snippetHash] = incomingJsonnet
 		} else {
-			log.Printf("cache hit for %s\n", snippetHash)
+			log.Printf("cache hit for %s, updating snippet\n", snippetHash)
+			cache[snippetHash] = incomingJsonnet
 		}
 		shareMsg := fmt.Sprintf("Link: %s/share/%s\n", shareAddress, snippetHash)
 		w.Write([]byte(shareMsg))
