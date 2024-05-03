@@ -59,7 +59,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 		_, fmtErr := state.Vm.EvaluateAnonymousSnippet("", incomingJsonnet)
 		if fmtErr != nil {
 			// TODO: display an error for the bad req rather than using a 200
-			w.Write([]byte("Share is available for invalid Jsonnet\nRun your snippet to see the result."))
+			w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
 			return
 		}
 
