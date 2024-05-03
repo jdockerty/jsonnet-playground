@@ -14,6 +14,10 @@ push REGISTRY="ghcr.io/jdockerty/jsonnet-playground":
 run:
     KO_DATA_PATH="cmd/server/kodata" go run cmd/server/cmd.go
 
+# Run the server with hot reloading for templ components
+run_with_reload:
+    KO_DATA_PATH="cmd/server/kodata" templ generate --watch --proxy="http://127.0.0.1:8080" --cmd='go run cmd/server/cmd.go'
+
 # Install required dependencies
 deps:
     go install github.com/google/ko@latest
