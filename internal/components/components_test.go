@@ -1,8 +1,11 @@
 package components
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"io"
+	"strings"
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
@@ -34,7 +37,81 @@ func TestRootPage(t *testing.T) {
 	doc, err := goquery.NewDocumentFromReader(r)
 	assert.Nil(err)
 
+	textarea := doc.Find("#jsonnet-input").Get(0)
+	foundPlaceholder := false
+	foundAutofocus := false
+	foundOnKeyDown := false
+	foundHtmxGet := false
+	for _, attr := range textarea.Attr {
+
+		if attr.Key == "autofocus" {
+			foundAutofocus = true
+		}
+
+		if attr.Key == "onkeydown" && strings.Contains(attr.Val, "allowTabs") {
+			foundOnKeyDown = true
+		}
+
+		if attr.Val == "Type your Jsonnet here..." {
+			foundPlaceholder = true
+		}
+	}
+
+	assert.True(foundPlaceholder, "Placeholder text not found")
+	assert.True(foundAutofocus, "autofocus should be on the textarea")
+	assert.True(foundOnKeyDown, "onkeydown should contain the allowTabs script")
+	assert.False(foundHtmxGet, "No hx-get should be present")
+
 	assert.Equal("Jsonnet Playground", doc.Find("h1").Text())
+}
+
+func TestSharePageWithNoShare(t *testing.T) {
+	assert := assert.New(t)
+
+	shareWriter := bytes.NewBuffer(make([]byte, 1024))
+
+	rootWriter := bytes.NewBuffer(make([]byte, 1024))
+
+	SharePage("").Render(context.Background(), shareWriter)
+	RootPage().Render(context.Background(), rootWriter)
+
+	shareReader := bytes.NewReader(shareWriter.Bytes())
+	rootReader := bytes.NewReader(rootWriter.Bytes())
+
+	share, _ := io.ReadAll(shareReader)
+	root, _ := io.ReadAll(rootReader)
+	assert.Equal(share, root, "Share page with no path and Root page should be the same, expected: %+v, got: %+v", root, share)
+}
+
+func TestSharePageWithShare(t *testing.T) {
+	assert := assert.New(t)
+	fakePath := "fake"
+
+	r, w := io.Pipe()
+	go func() {
+		_ = SharePage(fakePath).Render(context.Background(), w)
+		_ = w.Close()
+	}()
+	doc, err := goquery.NewDocumentFromReader(r)
+	assert.Nil(err)
+
+	textarea := doc.Find("#jsonnet-input").Get(0)
+	foundHtmxGet := false
+	foundHtmxTrigger := false
+	for _, attr := range textarea.Attr {
+
+		if attr.Key == "hx-get" && attr.Val == fmt.Sprintf("/api/share/%s", fakePath) {
+			foundHtmxGet = true
+		}
+
+		if attr.Key == "hx-trigger" && attr.Val == "load" {
+			foundHtmxTrigger = true
+		}
+	}
+
+	assert.True(foundHtmxGet, "hx-get attribute should exist with the /api/share/%s path", fakePath)
+	assert.True(foundHtmxTrigger, "hx-trigger attribute should exist")
+
 }
 
 func TestJsonnetDisplay(t *testing.T) {
