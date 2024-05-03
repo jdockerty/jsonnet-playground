@@ -71,7 +71,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 			log.Printf("cache hit for %s, updating snippet\n", snippetHash)
 			state.Store[snippetHash] = incomingJsonnet
 		}
-		shareMsg := fmt.Sprintf("Link: %s/share/%s\n", state.Config.ShareDomain, snippetHash)
+		shareMsg := fmt.Sprintf("Link: %s/share/%s", state.Config.ShareDomain, snippetHash)
 		w.Write([]byte(shareMsg))
 	}
 }
