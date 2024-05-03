@@ -19,9 +19,6 @@ type PlaygroundServer struct {
 // Load the available routes for the server
 func (srv *PlaygroundServer) Routes() error {
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
 	path, ok := os.LookupEnv("KO_DATA_PATH")
 	if !ok || path == "" {
 		return fmt.Errorf("KO_DATA_PATH is not set")
@@ -35,6 +32,7 @@ func (srv *PlaygroundServer) Routes() error {
 	http.HandleFunc("/share/{shareHash}", routes.HandleShare(srv.State))
 
 	// Backend/API routes
+	http.HandleFunc("/api/health", routes.Health())
 	http.HandleFunc("/api/run", routes.HandleRun(srv.State))
 	http.HandleFunc("/api/share", routes.HandleCreateShare(srv.State))
 	http.HandleFunc("/api/share/{shareHash}", routes.HandleGetShare(srv.State))

@@ -9,6 +9,13 @@ import (
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
+// Health indicates whether the server is running.
+func Health() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("OK"))
+	}
+}
+
 // HandleRun receives Jsonnet input via text and evaluates it.
 func HandleRun(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
