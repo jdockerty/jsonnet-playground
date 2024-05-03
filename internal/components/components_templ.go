@@ -132,6 +132,35 @@ func title() templ.Component {
 	})
 }
 
+// Allow tab/shift-tab for (de)indentation within the input textarea.
+func allowTabs() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_allowTabs_2a5a`,
+		Function: `function __templ_allowTabs_2a5a(){var textarea = document.getElementById('jsonnet-input');
+    textarea.onkeydown = function(e) {
+        if (e.keyCode === 9 || e.which === 9) {
+            e.preventDefault();
+            if (e.shiftKey && this.selectionStart) {
+                if (this.value[this.selectionStart -1] === "\t") {
+                    var s = this.selectionStart;
+                    this.value = this.value.substring(0,this.selectionStart - 1) + this.value.substring(this.selectionEnd);
+                    this.selectionEnd = s-1; 
+                }
+            }
+            
+            if (!e.shiftKey) {
+                var s = this.selectionStart;
+                this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);
+                this.selectionEnd = s+1; 
+            }
+        }
+    }
+}`,
+		Call:       templ.SafeScript(`__templ_allowTabs_2a5a`),
+		CallInline: templ.SafeScriptInline(`__templ_allowTabs_2a5a`),
+	}
+}
+
 func jsonnetDisplay(sharedHash string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -149,31 +178,48 @@ func jsonnetDisplay(sharedHash string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, allowTabs())
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<textarea name=\"jsonnet-input\" id=\"jsonnet-input\" onkeydown=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var6 templ.ComponentScript = allowTabs()
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6.Call)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if sharedHash != "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<textarea name=\"jsonnet-input\" hx-get=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/share/%s", sharedHash))
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/share/%s", sharedHash))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/components.templ`, Line: 48, Col: 96}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/components.templ`, Line: 72, Col: 69}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"load\" id=\"jsonnet-input\"></textarea> ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" hx-trigger=\"load\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<textarea name=\"jsonnet-input\" autofocus id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"></textarea> ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" autofocus id=\"jsonnet-input\" placeholder=\"Type your Jsonnet here...\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button> <button type=\"submit\" hx-post=\"/api/share\" hx-target=\"#share-output\">Share</button><div class=\"share-container\"><p id=\"share-output\"></p></div></form><div class=\"jsonnet-output\"><textarea id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></textarea> <button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button> <button type=\"submit\" hx-post=\"/api/share\" hx-target=\"#share-output\">Share</button><div class=\"share-container\"><p id=\"share-output\"></p></div></form><div class=\"jsonnet-output\"><textarea tabindex=\"-1\" id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -192,9 +238,9 @@ func RootPage() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html>")
