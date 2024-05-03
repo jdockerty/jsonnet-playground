@@ -135,8 +135,8 @@ func title() templ.Component {
 // Allow tab/shift-tab for (de)indentation within the input textarea.
 func allowTabs() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_allowTabs_2a5a`,
-		Function: `function __templ_allowTabs_2a5a(){var textarea = document.getElementById('jsonnet-input');
+		Name: `__templ_allowTabs_6d05`,
+		Function: `function __templ_allowTabs_6d05(){var textarea = document.getElementById('jsonnet-input');
     textarea.onkeydown = function(e) {
         if (e.keyCode === 9 || e.which === 9) {
             e.preventDefault();
@@ -144,20 +144,20 @@ func allowTabs() templ.ComponentScript {
                 if (this.value[this.selectionStart -1] === "\t") {
                     var s = this.selectionStart;
                     this.value = this.value.substring(0,this.selectionStart - 1) + this.value.substring(this.selectionEnd);
-                    this.selectionEnd = s-1; 
+                    this.selectionEnd = s-1;
                 }
             }
-            
+
             if (!e.shiftKey) {
                 var s = this.selectionStart;
                 this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);
-                this.selectionEnd = s+1; 
+                this.selectionEnd = s+1;
             }
         }
     }
 }`,
-		Call:       templ.SafeScript(`__templ_allowTabs_2a5a`),
-		CallInline: templ.SafeScriptInline(`__templ_allowTabs_2a5a`),
+		Call:       templ.SafeScript(`__templ_allowTabs_6d05`),
+		CallInline: templ.SafeScriptInline(`__templ_allowTabs_6d05`),
 	}
 }
 
