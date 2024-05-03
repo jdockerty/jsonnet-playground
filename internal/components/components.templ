@@ -41,14 +41,40 @@ templ title() {
     </header>
 }
 
+// Allow tab/shift-tab for (de)indentation within the input textarea.
+script allowTabs() {
+    var textarea = document.getElementById('jsonnet-input');
+    textarea.onkeydown = function(e) {
+        if (e.keyCode === 9 || e.which === 9) {
+            e.preventDefault();
+            if (e.shiftKey && this.selectionStart) {
+                if (this.value[this.selectionStart -1] === "\t") {
+                    var s = this.selectionStart;
+                    this.value = this.value.substring(0,this.selectionStart - 1) + this.value.substring(this.selectionEnd);
+                    this.selectionEnd = s-1;
+                }
+            }
+
+            if (!e.shiftKey) {
+                var s = this.selectionStart;
+                this.value = this.value.substring(0,this.selectionStart) + "\t" + this.value.substring(this.selectionEnd);
+                this.selectionEnd = s+1;
+            }
+        }
+    }
+}
+
 templ jsonnetDisplay(sharedHash string) {
     <div class="jsonnet-editor" id="jsonnet-container">
         <form id="jsonnet-form">
-            if sharedHash != "" {
-                <textarea name="jsonnet-input" hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load" id="jsonnet-input"></textarea>
-            } else {
-                <textarea name="jsonnet-input" autofocus id="jsonnet-input" placeholder="Type your Jsonnet here..."></textarea>
-            }
+            <textarea name="jsonnet-input" id="jsonnet-input" onkeydown={ allowTabs() }
+                if sharedHash != "" {
+                    hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load"
+                } else {
+                    autofocus id="jsonnet-input" placeholder="Type your Jsonnet here..."
+                }
+                >
+                </textarea>
             <button
                 type="submit"
                 hx-post="/api/run"
@@ -68,7 +94,7 @@ templ jsonnetDisplay(sharedHash string) {
             </div>
         </form>
         <div class="jsonnet-output">
-            <textarea id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
+            <textarea tabindex="-1" id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
         </div>
     </div>
 }
