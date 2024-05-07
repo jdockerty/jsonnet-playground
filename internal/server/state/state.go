@@ -6,13 +6,15 @@ import (
 	"hash"
 
 	"github.com/google/go-jsonnet"
+	"github.com/kubecfg/kubecfg/pkg/kubecfg"
 )
 
 // New creates a new default State
 func New(shareAddress string) *State {
+	vm, _ := kubecfg.JsonnetVM(kubecfg.WithAlpha(true))
 	return &State{
 		Store:  make(map[string]string),
-		Vm:     jsonnet.MakeVM(),
+		Vm:     vm,
 		Hasher: sha512.New(),
 		Config: &Config{
 			ShareDomain: shareAddress,
