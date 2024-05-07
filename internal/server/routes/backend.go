@@ -31,11 +31,10 @@ func HandleRun(state *state.State) http.HandlerFunc {
 		}
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		evaluated, fmtErr := state.Vm.EvaluateAnonymousSnippet("", incomingJsonnet)
-		if fmtErr != nil {
-			errMsg := fmt.Errorf("Invalid Jsonnet: %w", fmtErr)
+		evaluated, err := state.EvaluateSnippet(incomingJsonnet)
+		if err != nil {
 			// TODO: display an error for the bad req rather than using a 200
-			w.Write([]byte(errMsg.Error()))
+			w.Write([]byte(err.Error()))
 			return
 		}
 
@@ -63,8 +62,8 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 		}
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		_, fmtErr := state.Vm.EvaluateAnonymousSnippet("", incomingJsonnet)
-		if fmtErr != nil {
+		_, err = state.EvaluateSnippet(incomingJsonnet)
+		if err != nil {
 			// TODO: display an error for the bad req rather than using a 200
 			w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
 			return

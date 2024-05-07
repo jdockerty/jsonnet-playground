@@ -2,6 +2,7 @@ package state
 
 import (
 	"crypto/sha512"
+	"fmt"
 	"hash"
 
 	"github.com/google/go-jsonnet"
@@ -25,6 +26,15 @@ type State struct {
 	Vm     *jsonnet.VM
 	Hasher hash.Hash
 	Config *Config
+}
+
+func (s *State) EvaluateSnippet(snippet string) (string, error) {
+	evaluated, fmtErr := s.Vm.EvaluateAnonymousSnippet("", snippet)
+	if fmtErr != nil {
+		// TODO: display an error for the bad req rather than using a 200
+		return "", fmt.Errorf("Invalid Jsonnet: %w", fmtErr)
+	}
+	return evaluated, nil
 }
 
 // Config contains server configuration
