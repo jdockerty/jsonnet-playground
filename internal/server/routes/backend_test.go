@@ -48,7 +48,7 @@ func TestHandleRun(t *testing.T) {
 	}
 }
 
-func TestHandleShare(t *testing.T) {
+func TestHandleCreateShare(t *testing.T) {
 
 	tests := []struct {
 		name       string
@@ -80,4 +80,34 @@ func TestHandleShare(t *testing.T) {
 		expected := fmt.Sprintf("Link: https://example.com/share/%s", snippetHash)
 		assert.Equal(t, rec.Body.String(), expected, "expected: %s, got: %s", tc.name, expected, rec.Body.String())
 	}
+}
+
+func TestHandleGetShare(t *testing.T) {
+	assert := assert.New(t)
+	s := state.New("https://example.com")
+	snippet := "{hello: 'world'}"
+	snippetHash := hex.EncodeToString(sha512.New().Sum([]byte(snippet)))[:15]
+
+	// Get non-existent snippet
+	handler := routes.HandleGetShare(s)
+	path := fmt.Sprintf("/api/share/%s", snippetHash)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", path, nil)
+	handler.ServeHTTP(rec, req)
+
+	assert.Contains(rec.Body.String(), "No share snippet exists")
+
+	// Add snippet to store
+	evaluated, _ := jsonnet.MakeVM().EvaluateAnonymousSnippet("", snippet)
+	s.Store[snippetHash] = evaluated
+
+	// Get snippet which has been added
+	handler = routes.HandleGetShare(s)
+	rec = httptest.NewRecorder()
+	req = httptest.NewRequest("GET", fmt.Sprintf("/api/share/%s", snippetHash), nil)
+	req.SetPathValue("shareHash", snippetHash)
+	handler.ServeHTTP(rec, req)
+
+	assert.Equal(evaluated, rec.Body.String())
+
 }
