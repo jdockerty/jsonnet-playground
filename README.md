@@ -24,6 +24,7 @@ by simply sending them the link. This will then be loaded by the server and disp
 
 - Evaluate Jsonnet in browser
 - Share snippets with others
+- Utilise [`kubecfg`](https://github.com/kubecfg/kubecfg) functionality
 
 ## Development
 
