@@ -15,11 +15,8 @@ func TestEvaluateSnippet(t *testing.T) {
 	assert.Equal(t, "{ }\n", eval)
 
 	eval, _ = s.EvaluateSnippet("{hello: 'world'}")
-	expected := `{
-   "hello": "world"
-}
-`
-	assert.Equal(t, expected, eval)
+	expected, _ := os.ReadFile("../../../testdata/hello-world.json")
+	assert.Equal(t, string(expected), eval)
 }
 
 func TestEvaluateKubecfg(t *testing.T) {
@@ -27,10 +24,7 @@ func TestEvaluateKubecfg(t *testing.T) {
 
 	f, _ := os.ReadFile("../../../testdata/kubecfg.jsonnet")
 
-	expected := `{
-   "hasValue": true
-}
-`
+	expected, _ := os.ReadFile("../../../testdata/kubecfg.json")
 	eval, _ := s.EvaluateSnippet(string(f))
-	assert.Equal(t, expected, eval)
+	assert.Equal(t, string(expected), eval)
 }
