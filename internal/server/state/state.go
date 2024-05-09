@@ -6,13 +6,20 @@ import (
 	"hash"
 
 	"github.com/google/go-jsonnet"
+	"github.com/kubecfg/kubecfg/pkg/kubecfg"
 )
+
+// Providing a name for error message purposes, this has no use expect to provide
+// more presentable error messages as it shows the error being in 'play.jsonnet',
+// as opposed to no file name.
+const PlaygroundFile = "play.jsonnet"
 
 // New creates a new default State
 func New(shareAddress string) *State {
+	vm, _ := kubecfg.JsonnetVM()
 	return &State{
 		Store:  make(map[string]string),
-		Vm:     jsonnet.MakeVM(),
+		Vm:     vm,
 		Hasher: sha512.New(),
 		Config: &Config{
 			ShareDomain: shareAddress,
@@ -29,7 +36,7 @@ type State struct {
 }
 
 func (s *State) EvaluateSnippet(snippet string) (string, error) {
-	evaluated, fmtErr := s.Vm.EvaluateAnonymousSnippet("", snippet)
+	evaluated, fmtErr := s.Vm.EvaluateAnonymousSnippet(PlaygroundFile, snippet)
 	if fmtErr != nil {
 		// TODO: display an error for the bad req rather than using a 200
 		return "", fmt.Errorf("Invalid Jsonnet: %w", fmtErr)

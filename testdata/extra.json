@@ -1,0 +1,19 @@
+{
+   "projects": [
+      {
+         "gruglb": {
+            "repository": "github.com/jdockerty/gruglb"
+         }
+      },
+      {
+         "jsonnet-playground": {
+            "repository": "github.com/jdockerty/jsonnet-playground"
+         }
+      },
+      {
+         "squirrel": {
+            "repository": "github.com/jdockerty/squirrel"
+         }
+      }
+   ]
+}

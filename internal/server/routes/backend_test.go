@@ -11,12 +11,20 @@ import (
 	"github.com/google/go-jsonnet"
 	"github.com/jdockerty/jsonnet-playground/internal/server/routes"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
+	"github.com/kubecfg/kubecfg/pkg/kubecfg"
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	vm *jsonnet.VM
+)
+
+func init() {
+	vm, _ = kubecfg.JsonnetVM()
+}
+
 func TestHandleRun(t *testing.T) {
 
-	vm := jsonnet.MakeVM()
 	tests := []struct {
 		name       string
 		input      string
@@ -24,6 +32,7 @@ func TestHandleRun(t *testing.T) {
 	}{
 		{name: "hello-world", input: "{hello: 'world'}", shouldFail: false},
 		{name: "blank", input: "{}", shouldFail: false},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}", shouldFail: false},
 		{name: "invalid-jsonnet", input: "{", shouldFail: true},
 		{name: "invalid-jsonnet-2", input: "{hello:}", shouldFail: true},
 	}
@@ -59,6 +68,7 @@ func TestHandleCreateShare(t *testing.T) {
 		{name: "blank", input: "{}", shouldFail: false},
 		{name: "invalid-jsonnet", input: "{", shouldFail: true},
 		{name: "invalid-jsonnet-2", input: "{hello:}", shouldFail: true},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}", shouldFail: false},
 	}
 
 	for _, tc := range tests {
@@ -98,7 +108,7 @@ func TestHandleGetShare(t *testing.T) {
 	assert.Contains(rec.Body.String(), "No share snippet exists")
 
 	// Add snippet to store
-	evaluated, _ := jsonnet.MakeVM().EvaluateAnonymousSnippet("", snippet)
+	evaluated, _ := vm.EvaluateAnonymousSnippet("", snippet)
 	s.Store[snippetHash] = evaluated
 
 	// Get snippet which has been added
