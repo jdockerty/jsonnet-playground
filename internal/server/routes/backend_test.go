@@ -68,6 +68,7 @@ func TestHandleCreateShare(t *testing.T) {
 		{name: "blank", input: "{}", shouldFail: false},
 		{name: "invalid-jsonnet", input: "{", shouldFail: true},
 		{name: "invalid-jsonnet-2", input: "{hello:}", shouldFail: true},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}", shouldFail: false},
 	}
 
 	for _, tc := range tests {
