@@ -6,6 +6,7 @@ import (
 	"hash"
 
 	"github.com/google/go-jsonnet"
+	"github.com/google/go-jsonnet/formatter"
 	"github.com/kubecfg/kubecfg/pkg/kubecfg"
 )
 
@@ -42,6 +43,15 @@ func (s *State) EvaluateSnippet(snippet string) (string, error) {
 		return "", fmt.Errorf("Invalid Jsonnet: %w", fmtErr)
 	}
 	return evaluated, nil
+}
+
+func (s *State) FormatSnippet(snippet string) (string, error) {
+	opts := formatter.DefaultOptions()
+	output, err := formatter.Format(PlaygroundFile, snippet, opts)
+	if err != nil {
+		return "", nil
+	}
+	return output, nil
 }
 
 // Config contains server configuration
