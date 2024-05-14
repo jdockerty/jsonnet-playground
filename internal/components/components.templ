@@ -89,6 +89,13 @@ templ jsonnetDisplay(sharedHash string) {
             >
             Share
             </button>
+            <button
+                type="submit"
+                hx-post="/api/format"
+                hx-target="#jsonnet-input"
+            >
+            Format
+            </button>
             <div class="share-container">
             <p id="share-output"></p>
             </div>

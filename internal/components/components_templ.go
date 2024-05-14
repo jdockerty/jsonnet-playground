@@ -219,7 +219,7 @@ func jsonnetDisplay(sharedHash string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></textarea> <button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button> <button type=\"submit\" hx-post=\"/api/share\" hx-target=\"#share-output\">Share</button><div class=\"share-container\"><p id=\"share-output\"></p></div></form><div class=\"jsonnet-output\"><textarea tabindex=\"-1\" id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("></textarea> <button type=\"submit\" hx-post=\"/api/run\" hx-target=\"#jsonnet-output-container\">Run</button> <button type=\"submit\" hx-post=\"/api/share\" hx-target=\"#share-output\">Share</button> <button type=\"submit\" hx-post=\"/api/format\" hx-target=\"#jsonnet-input\">Format</button><div class=\"share-container\"><p id=\"share-output\"></p></div></form><div class=\"jsonnet-output\"><textarea tabindex=\"-1\" id=\"jsonnet-output-container\" readonly placeholder=\"Evaluated Jsonnet will be displayed here\"></textarea></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
