@@ -56,6 +56,7 @@ script handleFormat() {
         body: new URLSearchParams(data),
         method: 'POST'
     }).then(async (x) => {
+        // TODO: handle error into output box
         textarea.value = await x.text();
         htmx.process(document.body);
     });
