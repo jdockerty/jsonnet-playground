@@ -4,8 +4,10 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/google/go-jsonnet"
@@ -28,13 +30,14 @@ func TestHandleRun(t *testing.T) {
 	tests := []struct {
 		name       string
 		input      string
+		expected   string
 		shouldFail bool
 	}{
-		{name: "hello-world", input: "{hello: 'world'}", shouldFail: false},
-		{name: "blank", input: "{}", shouldFail: false},
-		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}", shouldFail: false},
-		{name: "invalid-jsonnet", input: "{", shouldFail: true},
-		{name: "invalid-jsonnet-2", input: "{hello:}", shouldFail: true},
+		{name: "hello-world", input: "{hello: 'world'}", expected: "../../../testdata/hello-world.json", shouldFail: false},
+		{name: "blank", input: "{}", expected: "../../../testdata/blank.json", shouldFail: false},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{myVeryNestedObj:: { foo: { bar: { baz: { qux: 'some-val' }}}}, hasValue: kubecfg.objectHasPathAll($.myVeryNestedObj, 'foo.bar.baz.qux')}", expected: "../../../testdata/kubecfg.json", shouldFail: false},
+		{name: "invalid-jsonnet", input: "{", expected: "", shouldFail: true},
+		{name: "invalid-jsonnet-2", input: "{hello:}", expected: "", shouldFail: true},
 	}
 
 	for _, tc := range tests {
@@ -52,8 +55,12 @@ func TestHandleRun(t *testing.T) {
 			assert.Contains(t, rec.Body.String(), "Invalid Jsonnet")
 			return
 		}
-		expected, _ := vm.EvaluateAnonymousSnippet("", tc.input)
-		assert.Equal(t, rec.Body.String(), expected, "[%s] expected: %s, got: %s", tc.name, expected, rec.Body.String())
+
+		f, err := os.Open(tc.expected)
+		assert.Nil(t, err, "Unable to open %s for test", err)
+		defer f.Close()
+		expected, _ := io.ReadAll(f)
+		assert.Equal(t, rec.Body.String(), string(expected), "[%s] expected: %s, got: %s", tc.name, expected, rec.Body.String())
 	}
 }
 
