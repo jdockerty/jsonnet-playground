@@ -46,10 +46,15 @@ func (s *State) EvaluateSnippet(snippet string) (string, error) {
 }
 
 func (s *State) FormatSnippet(snippet string) (string, error) {
+	_, err := s.EvaluateSnippet(snippet)
+	if err != nil {
+		return "", err
+	}
+
 	opts := formatter.DefaultOptions()
 	output, err := formatter.Format(PlaygroundFile, snippet, opts)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return output, nil
 }

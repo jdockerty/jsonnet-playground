@@ -41,6 +41,26 @@ templ title() {
     </header>
 }
 
+// Hacky function to replace the textarea with formatted Jsonnet.
+//
+// TODO(jdockerty): there may be a nicer way to do this with htmx, but disabling the
+// functionality of the hx-post and replacing the textarea value did not work
+// in the same way as the other htmx swaps, it had very odd behaviour instead.
+script handleFormat() {
+    var textarea = document.getElementById('jsonnet-input');
+    var data = new FormData();
+    data.append("jsonnet-input", textarea.value);
+    fetch("/api/format", {
+        // Using URLSearchParams means we send the expected www-form-url-encoded data.
+        // https://developer.mozilla.org/en-US/docs/Web/API/FormData
+        body: new URLSearchParams(data),
+        method: 'POST'
+    }).then(async (x) => {
+        textarea.value = await x.text();
+        htmx.process(document.body);
+    });
+}
+
 // Allow tab/shift-tab for (de)indentation within the input textarea.
 script allowTabs() {
     var textarea = document.getElementById('jsonnet-input');
@@ -71,7 +91,7 @@ templ jsonnetDisplay(sharedHash string) {
                 if sharedHash != "" {
                     hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load"
                 } else {
-                    autofocus id="jsonnet-input" placeholder="Type your Jsonnet here..."
+                    autofocus placeholder="Type your Jsonnet here..."
                 }
                 >
                 </textarea>
@@ -90,9 +110,8 @@ templ jsonnetDisplay(sharedHash string) {
             Share
             </button>
             <button
-                type="submit"
-                hx-post="/api/format"
-                hx-target="#jsonnet-input"
+                type="button"
+                onClick={ handleFormat() }
             >
             Format
             </button>
