@@ -21,3 +21,9 @@ run_reload:
 # Install required dependencies
 deps:
     go install github.com/google/ko@latest
+
+# Run various lint/generation tools
+lint:
+    go fmt ./...
+    templ fmt -v .
+    templ generate -v

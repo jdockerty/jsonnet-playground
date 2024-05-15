@@ -27,7 +27,8 @@ jobs:
       - name: Generate and check
         run: |
           go fmt ./...
-          templ generate
+          templ fmt -v .
+          templ generate -v
           # Ensure no diff detected in generated templ files
           git diff --exit-code
 
