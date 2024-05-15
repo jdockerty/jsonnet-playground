@@ -20,17 +20,6 @@ templ footer() {
     </footer>
 }
 
-templ SharePage(sharedHash string) {
-	<html>
-        @heading()
-		<body class="bg-gray-100">
-            @title()
-            @jsonnetDisplay(sharedHash)
-            @footer()
-		</body>
-	</html>
-}
-
 templ title() {
     <header class="hero is-primary">
         <div class="hero-body">
@@ -132,12 +121,16 @@ templ jsonnetDisplay(sharedHash string) {
     </div>
 }
 
-templ RootPage() {
+templ RootPage(sharedHash string) {
 	<html>
         @heading()
 		<body class="bg-gray-100">
             @title()
-            @jsonnetDisplay("")
+            if sharedHash != "" {
+                @jsonnetDisplay(sharedHash)
+            } else {
+                @jsonnetDisplay("")
+            }
             @footer()
 		</body>
 	</html>
