@@ -108,7 +108,7 @@ func HandleGetShare(state *state.State) http.HandlerFunc {
 func HandleFormat(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Error(w, "must be GET", 400)
+			http.Error(w, "must be POST", 400)
 			return
 		}
 		log.Println("Formatting snippet")
