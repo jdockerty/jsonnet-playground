@@ -47,6 +47,8 @@ templ title() {
 // functionality of the hx-post and replacing the textarea value did not work
 // in the same way as the other htmx swaps, it had very odd behaviour instead.
 script handleFormat() {
+    const jsonnetInput = document.getElementById('jsonnet-input');
+    const shareOutput = document.getElementById('share-output');
     var data = new FormData();
     data.append("jsonnet-input", jsonnetInput.value);
     fetch("/api/format", {
@@ -57,10 +59,10 @@ script handleFormat() {
     }).then(async (resp) => {
         if (resp.status === 400) {
             // Use the same area for share errors to avoid issues with interacting
-            // with the regular jsonnet output box.
-            document.getElementById('share-output').innerText = await resp.text();
+            // with the regular jsonnet output box
+            shareOutput.innerText = await resp.text();
         } else {
-            document.getElementById('jsonnet-input').value = await resp.text();
+            jsonnetInput.value = await resp.text();
         }
         htmx.process(document.body);
     });

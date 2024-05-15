@@ -139,8 +139,10 @@ func title() templ.Component {
 // in the same way as the other htmx swaps, it had very odd behaviour instead.
 func handleFormat() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_handleFormat_31cd`,
-		Function: `function __templ_handleFormat_31cd(){var data = new FormData();
+		Name: `__templ_handleFormat_5edd`,
+		Function: `function __templ_handleFormat_5edd(){const jsonnetInput = document.getElementById('jsonnet-input');
+    const shareOutput = document.getElementById('share-output');
+    var data = new FormData();
     data.append("jsonnet-input", jsonnetInput.value);
     fetch("/api/format", {
         // Using URLSearchParams means we send the expected www-form-url-encoded data.
@@ -150,16 +152,16 @@ func handleFormat() templ.ComponentScript {
     }).then(async (resp) => {
         if (resp.status === 400) {
             // Use the same area for share errors to avoid issues with interacting
-            // with the regular jsonnet output box.
-            document.getElementById('share-output').innerText = await resp.text();
+            // with the regular jsonnet output box
+            shareOutput.innerText = await resp.text();
         } else {
-            document.getElementById('jsonnet-input').value = await resp.text();
+            jsonnetInput.value = await resp.text();
         }
         htmx.process(document.body);
     });
 }`,
-		Call:       templ.SafeScript(`__templ_handleFormat_31cd`),
-		CallInline: templ.SafeScriptInline(`__templ_handleFormat_31cd`),
+		Call:       templ.SafeScript(`__templ_handleFormat_5edd`),
+		CallInline: templ.SafeScriptInline(`__templ_handleFormat_5edd`),
 	}
 }
 
@@ -234,7 +236,7 @@ func jsonnetDisplay(sharedHash string) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/api/share/%s", sharedHash))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/components.templ`, Line: 97, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/components/components.templ`, Line: 99, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
