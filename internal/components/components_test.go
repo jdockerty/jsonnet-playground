@@ -30,7 +30,7 @@ func TestRootPage(t *testing.T) {
 
 	r, w := io.Pipe()
 	go func() {
-		_ = RootPage().Render(context.Background(), w)
+		_ = RootPage("").Render(context.Background(), w)
 		_ = w.Close()
 	}()
 	doc, err := goquery.NewDocumentFromReader(r)
