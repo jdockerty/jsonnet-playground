@@ -64,7 +64,7 @@ func TestRootPage(t *testing.T) {
 	assert.Equal("Jsonnet Playground", doc.Find("h1").Text())
 }
 
-func TestSharePageWithShare(t *testing.T) {
+func TestRootPageWithShare(t *testing.T) {
 	assert := assert.New(t)
 	fakePath := "fake"
 
