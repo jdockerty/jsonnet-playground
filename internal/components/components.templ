@@ -47,17 +47,21 @@ templ title() {
 // functionality of the hx-post and replacing the textarea value did not work
 // in the same way as the other htmx swaps, it had very odd behaviour instead.
 script handleFormat() {
-    var textarea = document.getElementById('jsonnet-input');
     var data = new FormData();
-    data.append("jsonnet-input", textarea.value);
+    data.append("jsonnet-input", jsonnetInput.value);
     fetch("/api/format", {
         // Using URLSearchParams means we send the expected www-form-url-encoded data.
         // https://developer.mozilla.org/en-US/docs/Web/API/FormData
         body: new URLSearchParams(data),
         method: 'POST'
-    }).then(async (x) => {
-        // TODO: handle error into output box
-        textarea.value = await x.text();
+    }).then(async (resp) => {
+        if (resp.status === 400) {
+            // Use the same area for share errors to avoid issues with interacting
+            // with the regular jsonnet output box.
+            document.getElementById('share-output').innerText = await resp.text();
+        } else {
+            document.getElementById('jsonnet-input').value = await resp.text();
+        }
         htmx.process(document.body);
     });
 }

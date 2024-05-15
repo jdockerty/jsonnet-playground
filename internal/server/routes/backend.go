@@ -123,7 +123,7 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 		log.Println("Incoming:", incomingJsonnet)
 		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
 		if err != nil {
-			http.Error(w, "unable to format jsonnet", 400)
+			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", 400)
 			return
 		}
 		log.Println("Formatted:", formattedJsonnet)
