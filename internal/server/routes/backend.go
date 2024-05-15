@@ -103,3 +103,31 @@ func HandleGetShare(state *state.State) http.HandlerFunc {
 		w.Write([]byte(snippet))
 	}
 }
+
+// Format the input Jsonnet according to the standard jsonnetfmt rules.
+func HandleFormat(state *state.State) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "must be POST", 400)
+			return
+		}
+		log.Println("Formatting snippet")
+
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "unable to parse form", 400)
+			return
+		}
+
+		incomingJsonnet := r.FormValue("jsonnet-input")
+		log.Println("Incoming:", incomingJsonnet)
+		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
+		if err != nil {
+			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", 400)
+			return
+		}
+		log.Println("Formatted:", formattedJsonnet)
+		w.Write([]byte(formattedJsonnet))
+		return
+	}
+}

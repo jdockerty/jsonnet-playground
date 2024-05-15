@@ -28,3 +28,10 @@ func TestEvaluateKubecfg(t *testing.T) {
 	eval, _ := s.EvaluateSnippet(string(f))
 	assert.Equal(t, string(expected), eval)
 }
+
+func TestFormat(t *testing.T) {
+	s := state.New("")
+
+	eval, _ := s.FormatSnippet(`{hello:"world"}`)
+	assert.Equal(t, eval, "{ hello: 'world' }\n")
+}
