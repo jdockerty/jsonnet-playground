@@ -22,11 +22,11 @@ func HandleShare(state *state.State) http.HandlerFunc {
 
 		if shareHash == "" {
 			log.Println("Browsed to share with no hash, rendering root page")
-			components.RootPage("").Render(context.Background(), w)
+			_ = components.RootPage("").Render(context.Background(), w)
 			return
 		}
 		log.Println("Rendering share page")
 		sharePage := components.RootPage(shareHash)
-		sharePage.Render(context.Background(), w)
+		_ = sharePage.Render(context.Background(), w)
 	}
 }

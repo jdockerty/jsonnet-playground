@@ -12,7 +12,7 @@ import (
 // Health indicates whether the server is running.
 func Health() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+		_, _ = w.Write([]byte("OK"))
 	}
 }
 
@@ -34,12 +34,12 @@ func HandleRun(state *state.State) http.HandlerFunc {
 		evaluated, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
 			// TODO: display an error for the bad req rather than using a 200
-			w.Write([]byte(err.Error()))
+			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
 
 		log.Printf("Snippet:\n%s\n", evaluated)
-		w.Write([]byte(evaluated))
+		_, _ = w.Write([]byte(evaluated))
 	}
 }
 
@@ -65,7 +65,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 		_, err = state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
 			// TODO: display an error for the bad req rather than using a 200
-			w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
+			_, _ = w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
 			return
 		}
 
@@ -78,7 +78,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 			state.Store[snippetHash] = incomingJsonnet
 		}
 		shareMsg := fmt.Sprintf("Link: %s/share/%s", state.Config.ShareDomain, snippetHash)
-		w.Write([]byte(shareMsg))
+		_, _ = w.Write([]byte(shareMsg))
 	}
 }
 
@@ -96,11 +96,11 @@ func HandleGetShare(state *state.State) http.HandlerFunc {
 		snippet, ok := state.Store[shareHash]
 		if !ok {
 			errMsg := fmt.Errorf("No share snippet exists for %s, it might have expired.\n", shareHash)
-			w.Write([]byte(errMsg.Error()))
+			_, _ = w.Write([]byte(errMsg.Error()))
 			return
 		}
 		log.Printf("Loading shared snippet for %s\n", shareHash)
-		w.Write([]byte(snippet))
+		_, _ = w.Write([]byte(snippet))
 	}
 }
 
@@ -127,7 +127,6 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 			return
 		}
 		log.Println("Formatted:", formattedJsonnet)
-		w.Write([]byte(formattedJsonnet))
-		return
+		_, _ = w.Write([]byte(formattedJsonnet))
 	}
 }
