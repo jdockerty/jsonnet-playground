@@ -13,9 +13,6 @@ var (
 	host         string
 	port         int
 	shareAddress string
-
-	// In-memory store for single running instance of the application.
-	cache map[string]string
 )
 
 func init() {

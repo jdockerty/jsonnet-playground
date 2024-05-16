@@ -3,42 +3,31 @@ package components
 import "fmt"
 
 templ heading() {
-    <head>
-        <meta charset="UTF-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>Jsonnet Playground</title>
-        <link rel="stylesheet" href="/assets/style.css"/>
-        <script src="/assets/htmx.min.js"></script>
-    </head>
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Jsonnet Playground</title>
+		<link rel="stylesheet" href="/assets/style.css"/>
+		<script src="/assets/htmx.min.js"></script>
+	</head>
 }
 
 templ footer() {
-    <footer>
-        <a href="https://github.com/jdockerty/jsonnet-playground" target="_blank">
-            <img src="/assets/img/github-mark-white.svg" alt="GitHub Logo" width="30"/>
-        </a>
-    </footer>
-}
-
-templ SharePage(sharedHash string) {
-	<html>
-        @heading()
-		<body class="bg-gray-100">
-            @title()
-            @jsonnetDisplay(sharedHash)
-            @footer()
-		</body>
-	</html>
+	<footer>
+		<a href="https://github.com/jdockerty/jsonnet-playground" target="_blank">
+			<img src="/assets/img/github-mark-white.svg" alt="GitHub Logo" width="30"/>
+		</a>
+	</footer>
 }
 
 templ title() {
-    <header class="hero is-primary">
-        <div class="hero-body">
-            <div class="container">
-                <h1 class="title">Jsonnet Playground</h1>
-            </div>
-        </div>
-    </header>
+	<header class="hero is-primary">
+		<div class="hero-body">
+			<div class="container">
+				<h1 class="title">Jsonnet Playground</h1>
+			</div>
+		</div>
+	</header>
 }
 
 // Hacky function to replace the textarea with formatted Jsonnet.
@@ -46,6 +35,7 @@ templ title() {
 // TODO(jdockerty): there may be a nicer way to do this with htmx, but disabling the
 // functionality of the hx-post and replacing the textarea value did not work
 // in the same way as the other htmx swaps, it had very odd behaviour instead.
+
 script handleFormat() {
     const jsonnetInput = document.getElementById('jsonnet-input');
     const shareOutput = document.getElementById('share-output');
@@ -69,6 +59,7 @@ script handleFormat() {
 }
 
 // Allow tab/shift-tab for (de)indentation within the input textarea.
+
 script allowTabs() {
     var textarea = document.getElementById('jsonnet-input');
     textarea.onkeydown = function(e) {
@@ -92,53 +83,61 @@ script allowTabs() {
 }
 
 templ jsonnetDisplay(sharedHash string) {
-    <div class="jsonnet-editor" id="jsonnet-container">
-        <form id="jsonnet-form">
-            <textarea name="jsonnet-input" id="jsonnet-input" onkeydown={ allowTabs() }
-                if sharedHash != "" {
-                    hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) } hx-trigger="load"
-                } else {
-                    autofocus placeholder="Type your Jsonnet here..."
-                }
-                >
-                </textarea>
-            <button
-                type="submit"
-                hx-post="/api/run"
-                hx-target="#jsonnet-output-container"
-            >
-            Run
-            </button>
-            <button
-                type="submit"
-                hx-post="/api/share"
-                hx-target="#share-output"
-            >
-            Share
-            </button>
-            <button
-                type="button"
-                onClick={ handleFormat() }
-            >
-            Format
-            </button>
-            <div class="share-container">
-            <p id="share-output"></p>
-            </div>
-        </form>
-        <div class="jsonnet-output">
-            <textarea tabindex="-1" id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
-        </div>
-    </div>
+	<div class="jsonnet-editor" id="jsonnet-container">
+		<form id="jsonnet-form">
+			<textarea
+				name="jsonnet-input"
+				id="jsonnet-input"
+				onkeydown={ allowTabs() }
+				if sharedHash != "" {
+					hx-get={ fmt.Sprintf("/api/share/%s", sharedHash) }
+					hx-trigger="load"
+				} else {
+					autofocus
+					placeholder="Type your Jsonnet here..."
+				}
+			></textarea>
+			<button
+				type="submit"
+				hx-post="/api/run"
+				hx-target="#jsonnet-output-container"
+			>
+				Run
+			</button>
+			<button
+				type="submit"
+				hx-post="/api/share"
+				hx-target="#share-output"
+			>
+				Share
+			</button>
+			<button
+				type="button"
+				onClick={ handleFormat() }
+			>
+				Format
+			</button>
+			<div class="share-container">
+				<p id="share-output"></p>
+			</div>
+		</form>
+		<div class="jsonnet-output">
+			<textarea tabindex="-1" id="jsonnet-output-container" readonly placeholder="Evaluated Jsonnet will be displayed here"></textarea>
+		</div>
+	</div>
 }
 
-templ RootPage() {
+templ RootPage(sharedHash string) {
 	<html>
-        @heading()
+		@heading()
 		<body class="bg-gray-100">
-            @title()
-            @jsonnetDisplay("")
-            @footer()
+			@title()
+			if sharedHash != "" {
+				@jsonnetDisplay(sharedHash)
+			} else {
+				@jsonnetDisplay("")
+			}
+			@footer()
 		</body>
 	</html>
 }

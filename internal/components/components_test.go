@@ -1,7 +1,6 @@
 package components
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -31,7 +30,7 @@ func TestRootPage(t *testing.T) {
 
 	r, w := io.Pipe()
 	go func() {
-		_ = RootPage().Render(context.Background(), w)
+		_ = RootPage("").Render(context.Background(), w)
 		_ = w.Close()
 	}()
 	doc, err := goquery.NewDocumentFromReader(r)
@@ -65,31 +64,13 @@ func TestRootPage(t *testing.T) {
 	assert.Equal("Jsonnet Playground", doc.Find("h1").Text())
 }
 
-func TestSharePageWithNoShare(t *testing.T) {
-	assert := assert.New(t)
-
-	shareWriter := bytes.NewBuffer(make([]byte, 1024))
-
-	rootWriter := bytes.NewBuffer(make([]byte, 1024))
-
-	SharePage("").Render(context.Background(), shareWriter)
-	RootPage().Render(context.Background(), rootWriter)
-
-	shareReader := bytes.NewReader(shareWriter.Bytes())
-	rootReader := bytes.NewReader(rootWriter.Bytes())
-
-	share, _ := io.ReadAll(shareReader)
-	root, _ := io.ReadAll(rootReader)
-	assert.Equal(share, root, "Share page with no path and Root page should be the same, expected: %+v, got: %+v", root, share)
-}
-
-func TestSharePageWithShare(t *testing.T) {
+func TestRootPageWithShare(t *testing.T) {
 	assert := assert.New(t)
 	fakePath := "fake"
 
 	r, w := io.Pipe()
 	go func() {
-		_ = SharePage(fakePath).Render(context.Background(), w)
+		_ = RootPage(fakePath).Render(context.Background(), w)
 		_ = w.Close()
 	}()
 	doc, err := goquery.NewDocumentFromReader(r)

@@ -25,7 +25,7 @@ func (srv *PlaygroundServer) Routes() error {
 	}
 
 	// Frontend routes
-	rootPage := components.RootPage()
+	rootPage := components.RootPage("")
 	fs := http.FileServer(http.Dir(path))
 	http.Handle("/assets/", routes.HandleAssets("/assets/", fs))
 	http.Handle("/", templ.Handler(rootPage))
