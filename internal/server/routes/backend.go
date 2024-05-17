@@ -122,6 +122,9 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 	}
 }
 
+// Middleware to stop Jsonnet snippets which contain file:///, typically paired
+// with an import, being used and becoming shareable. These are rejected before
+// running through the Jsonnet VM and a generic error is displayed.
 func DisableFileImports(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -132,7 +135,7 @@ func DisableFileImports(next http.Handler) http.HandlerFunc {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		if ok := disallowFileImports.Match([]byte(incomingJsonnet)); ok {
 			log.Println("Attempt to import file", incomingJsonnet)
-			w.Write([]byte("File imports are disabled."))
+			_, _ = w.Write([]byte("File imports are disabled."))
 			return
 		}
 		next.ServeHTTP(w, r)
