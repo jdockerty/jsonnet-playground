@@ -5,8 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
+)
+
+var (
+	// Do not allow import 'file:///<some_file>' expressions, as this allows
+	// snooping throughout the container file system.
+	disallowFileImports regexp.Regexp = *regexp.MustCompile(`file:/*`)
 )
 
 // Health indicates whether the server is running.
@@ -21,12 +28,6 @@ func HandleRun(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "must be POST", 400)
-			return
-		}
-
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "unable to parse form", 400)
 			return
 		}
 
@@ -55,14 +56,8 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 			return
 		}
 
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "unable to parse form", 400)
-			return
-		}
-
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		_, err = state.EvaluateSnippet(incomingJsonnet)
+		_, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
 			// TODO: display an error for the bad req rather than using a 200
 			_, _ = w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
@@ -113,12 +108,6 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 		}
 		log.Println("Formatting snippet")
 
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "unable to parse form", 400)
-			return
-		}
-
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		log.Println("Incoming:", incomingJsonnet)
 		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
@@ -128,5 +117,22 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 		}
 		log.Println("Formatted:", formattedJsonnet)
 		_, _ = w.Write([]byte(formattedJsonnet))
+	}
+}
+
+func DisableFileImports(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "unable to parse form", 400)
+			return
+		}
+		incomingJsonnet := r.FormValue("jsonnet-input")
+		if ok := disallowFileImports.Match([]byte(incomingJsonnet)); ok {
+			log.Println("Attempt to import file", incomingJsonnet)
+			w.Write([]byte("File imports are disabled."))
+			return
+		}
+		next.ServeHTTP(w, r)
 	}
 }

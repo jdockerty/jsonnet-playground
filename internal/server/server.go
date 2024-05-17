@@ -33,10 +33,10 @@ func (srv *PlaygroundServer) Routes() error {
 
 	// Backend/API routes
 	http.HandleFunc("/api/health", routes.Health())
-	http.HandleFunc("/api/run", routes.HandleRun(srv.State))
-	http.HandleFunc("/api/format", routes.HandleFormat(srv.State))
-	http.HandleFunc("/api/share", routes.HandleCreateShare(srv.State))
-	http.HandleFunc("/api/share/{shareHash}", routes.HandleGetShare(srv.State))
+	http.HandleFunc("/api/run", routes.DisableFileImports(routes.HandleRun(srv.State)))
+	http.HandleFunc("/api/format", routes.DisableFileImports(routes.HandleFormat(srv.State)))
+	http.HandleFunc("/api/share", routes.DisableFileImports(routes.HandleCreateShare(srv.State)))
+	http.HandleFunc("/api/share/{shareHash}", routes.DisableFileImports(routes.HandleGetShare(srv.State)))
 	return nil
 }
 
