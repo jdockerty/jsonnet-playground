@@ -36,8 +36,9 @@ func TestHandleRun(t *testing.T) {
 		{name: "hello-world", input: "{hello: 'world'}", expected: "../../../testdata/hello-world.json", shouldFail: false},
 		{name: "blank", input: "{}", expected: "../../../testdata/blank.json", shouldFail: false},
 		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{myVeryNestedObj:: { foo: { bar: { baz: { qux: 'some-val' }}}}, hasValue: kubecfg.objectHasPathAll($.myVeryNestedObj, 'foo.bar.baz.qux')}", expected: "../../../testdata/kubecfg.json", shouldFail: false},
-		{name: "invalid-jsonnet", input: "{", expected: "", shouldFail: true},
-		{name: "invalid-jsonnet-2", input: "{hello:}", expected: "", shouldFail: true},
+		{name: "invalid-jsonnet", input: "{", expected: "Invalid Jsonnet", shouldFail: true},
+		{name: "invalid-jsonnet-2", input: "{hello:}", expected: "Invalid Jsonnet", shouldFail: true},
+		{name: "file-import-jsonnet", input: "local f = import 'file:///proc/self/environ'; error 'test' + f", expected: "File imports are disabled", shouldFail: true},
 	}
 
 	for _, tc := range tests {
@@ -52,7 +53,7 @@ func TestHandleRun(t *testing.T) {
 		handler.ServeHTTP(rec, req)
 
 		if tc.shouldFail {
-			assert.Contains(t, rec.Body.String(), "Invalid Jsonnet")
+			assert.Contains(t, rec.Body.String(), tc.expected)
 			return
 		}
 
