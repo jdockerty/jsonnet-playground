@@ -34,12 +34,13 @@ func HandleRun(state *state.State) http.HandlerFunc {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		evaluated, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
+			log.Printf("Attempted to run invalid snippet: %s", incomingJsonnet)
 			// TODO: display an error for the bad req rather than using a 200
 			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
 
-		log.Printf("Snippet:\n%s\n", evaluated)
+		log.Printf("Snippet:\n%s", evaluated)
 		_, _ = w.Write([]byte(evaluated))
 	}
 }
@@ -59,6 +60,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		_, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
+			log.Println("Attempted share of invalid snippet", incomingJsonnet)
 			// TODO: display an error for the bad req rather than using a 200
 			_, _ = w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
 			return
@@ -106,12 +108,12 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 			http.Error(w, "must be POST", 400)
 			return
 		}
-		log.Println("Formatting snippet")
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		log.Println("Incoming:", incomingJsonnet)
+		log.Println("Attempting to format:", incomingJsonnet)
 		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
 		if err != nil {
+			log.Println("Unable to format invalid Jsonnet")
 			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", 400)
 			return
 		}
