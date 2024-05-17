@@ -27,7 +27,7 @@ func Health() http.HandlerFunc {
 func HandleRun(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Error(w, "must be POST", 400)
+			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
 
@@ -53,7 +53,7 @@ func HandleRun(state *state.State) http.HandlerFunc {
 func HandleCreateShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Error(w, "must be POST", 400)
+			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
 
@@ -84,7 +84,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 func HandleGetShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			http.Error(w, "must be GET", 400)
+			http.Error(w, "must be GET", http.StatusBadRequest)
 			return
 		}
 		shareHash := r.PathValue("shareHash")
@@ -105,7 +105,7 @@ func HandleGetShare(state *state.State) http.HandlerFunc {
 func HandleFormat(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			http.Error(w, "must be POST", 400)
+			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
 
@@ -114,7 +114,7 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
 		if err != nil {
 			log.Println("Unable to format invalid Jsonnet")
-			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", 400)
+			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", http.StatusBadRequest)
 			return
 		}
 		log.Println("Formatted:", formattedJsonnet)
@@ -126,7 +126,7 @@ func DisableFileImports(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "unable to parse form", 400)
+			http.Error(w, "unable to parse form", http.StatusBadRequest)
 			return
 		}
 		incomingJsonnet := r.FormValue("jsonnet-input")
