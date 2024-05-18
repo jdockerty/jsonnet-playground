@@ -137,8 +137,7 @@ func HandleVersions(state *state.State) http.HandlerFunc {
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
-		w.Write([]byte(versionResponse))
-		return
+		_, _ = w.Write([]byte(versionResponse))
 	}
 }
 
