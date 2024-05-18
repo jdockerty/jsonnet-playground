@@ -132,6 +132,7 @@ templ RootPage(sharedHash string) {
 		@heading()
 		<body class="bg-gray-100">
 			@title()
+			<p id="versions" hx-get="/api/versions" hx-trigger="load"></p>
 			if sharedHash != "" {
 				@jsonnetDisplay(sharedHash)
 			} else {

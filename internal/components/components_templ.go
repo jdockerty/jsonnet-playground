@@ -261,6 +261,10 @@ func RootPage(sharedHash string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p id=\"versions\" hx-get=\"/api/versions\" hx-trigger=\"load\"></p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if sharedHash != "" {
 			templ_7745c5c3_Err = jsonnetDisplay(sharedHash).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
