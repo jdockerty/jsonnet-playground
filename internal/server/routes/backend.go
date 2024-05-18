@@ -130,7 +130,7 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 }
 
 // Retrieve the current version of Jsonnet/Kubecfg in use for the running application.
-// This is purely information for display on the frontend.
+// This is purely informational for the frontend.
 func HandleVersions(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
