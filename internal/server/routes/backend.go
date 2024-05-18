@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/google/go-jsonnet"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
@@ -14,6 +15,12 @@ var (
 	// Do not allow import 'file:///<some_file>' expressions, as this allows
 	// snooping throughout the container file system.
 	disallowFileImports regexp.Regexp = *regexp.MustCompile(`file:/*`)
+
+	// kubecfg as a library does not show the tagged build version, instead it
+	// shows as "(dev build)". For now, this can be updated manually on occasional
+	// bumps.
+	kubecfgVersion  = "v0.34.3"
+	versionResponse = []byte(fmt.Sprintf("jsonnet: %s\nkubecfg: %s", jsonnet.Version(), kubecfgVersion))
 )
 
 // Health indicates whether the server is running.
@@ -119,6 +126,19 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 		}
 		log.Println("Formatted:", formattedJsonnet)
 		_, _ = w.Write([]byte(formattedJsonnet))
+	}
+}
+
+// Retrieve the current version of Jsonnet/Kubecfg in use for the running application.
+// This is purely information for display on the frontend.
+func HandleVersions(state *state.State) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "must be POST", http.StatusBadRequest)
+			return
+		}
+		w.Write([]byte(versionResponse))
+		return
 	}
 }
 

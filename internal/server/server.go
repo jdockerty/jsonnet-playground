@@ -37,6 +37,7 @@ func (srv *PlaygroundServer) Routes() error {
 	http.HandleFunc("/api/format", routes.DisableFileImports(routes.HandleFormat(srv.State)))
 	http.HandleFunc("/api/share", routes.DisableFileImports(routes.HandleCreateShare(srv.State)))
 	http.HandleFunc("/api/share/{shareHash}", routes.DisableFileImports(routes.HandleGetShare(srv.State)))
+	http.HandleFunc("/api/versions", routes.HandleVersions(srv.State))
 	return nil
 }
 
