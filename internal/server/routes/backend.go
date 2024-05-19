@@ -19,8 +19,8 @@ var (
 	// kubecfg as a library does not show the tagged build version, instead it
 	// shows as "(dev build)". For now, this can be updated manually on occasional
 	// bumps.
-	kubecfgVersion  = "v0.34.3"
-	versionResponse = []byte(fmt.Sprintf("jsonnet: %s kubecfg: %s", jsonnet.Version(), kubecfgVersion))
+	KubecfgVersion  = "v0.34.3"
+	VersionResponse = []byte(fmt.Sprintf("jsonnet: %s kubecfg: %s", jsonnet.Version(), KubecfgVersion))
 )
 
 // Health indicates whether the server is running.
@@ -137,7 +137,7 @@ func HandleVersions(state *state.State) http.HandlerFunc {
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
-		_, _ = w.Write([]byte(versionResponse))
+		_, _ = w.Write([]byte(VersionResponse))
 	}
 }
 
