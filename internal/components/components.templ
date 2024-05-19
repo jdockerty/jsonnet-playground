@@ -30,6 +30,12 @@ templ title() {
 	</header>
 }
 
+templ versions() {
+	<span class="versions">
+		<p id="versions" hx-get="/api/versions" hx-trigger="load"></p>
+	</span>
+}
+
 // Hacky function to replace the textarea with formatted Jsonnet.
 //
 // TODO(jdockerty): there may be a nicer way to do this with htmx, but disabling the
@@ -132,6 +138,7 @@ templ RootPage(sharedHash string) {
 		@heading()
 		<body class="bg-gray-100">
 			@title()
+			@versions()
 			if sharedHash != "" {
 				@jsonnetDisplay(sharedHash)
 			} else {

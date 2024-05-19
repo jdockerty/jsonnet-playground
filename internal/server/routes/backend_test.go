@@ -129,3 +129,15 @@ func TestHandleGetShare(t *testing.T) {
 	assert.Equal(evaluated, rec.Body.String())
 
 }
+
+func TestHandleVersions(t *testing.T) {
+	assert := assert.New(t)
+	s := state.New("https://example.com")
+
+	handler := routes.HandleVersions(s)
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/api/versions", nil)
+	handler.ServeHTTP(rec, req)
+
+	assert.Contains(rec.Body.String(), string(routes.VersionResponse))
+}
