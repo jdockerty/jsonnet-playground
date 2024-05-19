@@ -4,6 +4,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"hash"
+	"log/slog"
 
 	"github.com/google/go-jsonnet"
 	"github.com/google/go-jsonnet/formatter"
@@ -17,6 +18,11 @@ const PlaygroundFile = "play.jsonnet"
 
 // New creates a new default State
 func New(shareAddress string) *State {
+	return NewWithLogger(shareAddress, slog.Default())
+}
+
+// NewWithLogger creates a new default State
+func NewWithLogger(shareAddress string, logger *slog.Logger) *State {
 	vm, _ := kubecfg.JsonnetVM()
 	return &State{
 		Store:  make(map[string]string),
@@ -25,6 +31,7 @@ func New(shareAddress string) *State {
 		Config: &Config{
 			ShareDomain: shareAddress,
 		},
+		Logger: logger,
 	}
 }
 
@@ -34,6 +41,7 @@ type State struct {
 	Vm     *jsonnet.VM
 	Hasher hash.Hash
 	Config *Config
+	Logger *slog.Logger
 }
 
 func (s *State) EvaluateSnippet(snippet string) (string, error) {
@@ -61,5 +69,9 @@ func (s *State) FormatSnippet(snippet string) (string, error) {
 
 // Config contains server configuration
 type Config struct {
+	// ShareDomain is used for the share functionality. The shareable hash is
+	// appended to this value.
+	//
+	// In short, this value should be how the application is accessed.
 	ShareDomain string
 }
