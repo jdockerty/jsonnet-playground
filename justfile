@@ -22,6 +22,7 @@ run_reload LOG_LEVEL="info":
 deps:
     go install github.com/google/ko@latest
     go install github.com/a-h/templ/cmd/templ@$(go mod edit -json | jq -r '.Require[] | select(.Path | contains("templ")).Version')
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Run various lint/generation tools
 lint:
