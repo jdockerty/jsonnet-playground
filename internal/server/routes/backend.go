@@ -3,7 +3,6 @@ package routes
 import (
 	"encoding/hex"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 
@@ -24,8 +23,9 @@ var (
 )
 
 // Health indicates whether the server is running.
-func Health() http.HandlerFunc {
+func Health(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		state.Logger.Debug("health")
 		_, _ = w.Write([]byte("OK"))
 	}
 }
@@ -34,20 +34,22 @@ func Health() http.HandlerFunc {
 func HandleRun(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
+			state.Logger.Error("incorrect method to run handler", "method", r.Method)
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
+		state.Logger.Info("run triggered", "jsonnet", incomingJsonnet)
 		evaluated, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
-			log.Printf("Attempted to run invalid snippet: %s", incomingJsonnet)
+			state.Logger.Error("invalid snippet", "jsonnet", incomingJsonnet)
 			// TODO: display an error for the bad req rather than using a 200
 			_, _ = w.Write([]byte(err.Error()))
 			return
 		}
 
-		log.Printf("Snippet:\n%s", evaluated)
+		state.Logger.Info("evaluated", "jsonnet", evaluated)
 		_, _ = w.Write([]byte(evaluated))
 	}
 }
@@ -60,6 +62,7 @@ func HandleRun(state *state.State) http.HandlerFunc {
 func HandleCreateShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
+			state.Logger.Error("incorrect method to create share handler", "method", r.Method)
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
@@ -67,7 +70,7 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		_, err := state.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
-			log.Println("Attempted share of invalid snippet", incomingJsonnet)
+			state.Logger.Error("invalid share", "jsonnet", incomingJsonnet)
 			// TODO: display an error for the bad req rather than using a 200
 			_, _ = w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
 			return
@@ -75,14 +78,15 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 
 		snippetHash := hex.EncodeToString(state.Hasher.Sum([]byte(incomingJsonnet)))[:15]
 		if _, ok := state.Store[snippetHash]; !ok {
-			log.Printf("%s added to cache", snippetHash)
+			state.Logger.Info("store creation", "hash", snippetHash)
 			state.Store[snippetHash] = incomingJsonnet
 		} else {
-			log.Printf("cache hit for %s, updating snippet\n", snippetHash)
+			state.Logger.Info("store update", "hash", snippetHash)
 			state.Store[snippetHash] = incomingJsonnet
 		}
-		shareMsg := fmt.Sprintf("Link: %s/share/%s", state.Config.ShareDomain, snippetHash)
-		_, _ = w.Write([]byte(shareMsg))
+		shareMsg := fmt.Sprintf("%s/share/%s", state.Config.ShareDomain, snippetHash)
+		state.Logger.Debug("created share link", "link", shareMsg)
+		_, _ = w.Write([]byte("Link: " + shareMsg))
 	}
 }
 
@@ -91,19 +95,21 @@ func HandleCreateShare(state *state.State) http.HandlerFunc {
 func HandleGetShare(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
+			state.Logger.Error("incorrect method to get share handler", "method", r.Method)
 			http.Error(w, "must be GET", http.StatusBadRequest)
 			return
 		}
 		shareHash := r.PathValue("shareHash")
-		log.Printf("Call to /api/share/%s\n", shareHash)
+		state.Logger.Info("attempting to load shared snippet", "hash", shareHash)
 
 		snippet, ok := state.Store[shareHash]
 		if !ok {
+			state.Logger.Warn("no share snippet exists", "hash", shareHash)
 			errMsg := fmt.Errorf("No share snippet exists for %s, it might have expired.\n", shareHash)
 			_, _ = w.Write([]byte(errMsg.Error()))
 			return
 		}
-		log.Printf("Loading shared snippet for %s\n", shareHash)
+		state.Logger.Info("loaded shared snippet", "hash", shareHash)
 		_, _ = w.Write([]byte(snippet))
 	}
 }
@@ -112,19 +118,20 @@ func HandleGetShare(state *state.State) http.HandlerFunc {
 func HandleFormat(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
+			state.Logger.Error("incorrect method to format handler", "method", r.Method)
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
 
 		incomingJsonnet := r.FormValue("jsonnet-input")
-		log.Println("Attempting to format:", incomingJsonnet)
+		state.Logger.Info("attempting to format", "jsonnet", incomingJsonnet)
 		formattedJsonnet, err := state.FormatSnippet(incomingJsonnet)
 		if err != nil {
-			log.Println("Unable to format invalid Jsonnet")
+			state.Logger.Warn("cannot format invalid jsonnet")
 			http.Error(w, "Format is not available for invalid Jsonnet. Run your snippet to see the result.", http.StatusBadRequest)
 			return
 		}
-		log.Println("Formatted:", formattedJsonnet)
+		state.Logger.Info("formatted", "jsonnet", formattedJsonnet)
 		_, _ = w.Write([]byte(formattedJsonnet))
 	}
 }
@@ -134,6 +141,7 @@ func HandleFormat(state *state.State) http.HandlerFunc {
 func HandleVersions(state *state.State) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
+			state.Logger.Error("incorrect method to versions handler", "method", r.Method)
 			http.Error(w, "must be POST", http.StatusBadRequest)
 			return
 		}
@@ -144,16 +152,17 @@ func HandleVersions(state *state.State) http.HandlerFunc {
 // Middleware to stop Jsonnet snippets which contain file:///, typically paired
 // with an import, being used and becoming shareable. These are rejected before
 // running through the Jsonnet VM and a generic error is displayed.
-func DisableFileImports(next http.Handler) http.HandlerFunc {
+func DisableFileImports(state *state.State, next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
 		if err != nil {
+			state.Logger.Error("unable to parse form")
 			http.Error(w, "unable to parse form", http.StatusBadRequest)
 			return
 		}
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		if ok := disallowFileImports.Match([]byte(incomingJsonnet)); ok {
-			log.Println("Attempt to import file", incomingJsonnet)
+			state.Logger.Warn("attempt to import file", "jsonnet", incomingJsonnet)
 			_, _ = w.Write([]byte("File imports are disabled."))
 			return
 		}
