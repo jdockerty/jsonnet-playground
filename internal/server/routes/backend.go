@@ -20,7 +20,7 @@ var (
 	// shows as "(dev build)". For now, this can be updated manually on occasional
 	// bumps.
 	kubecfgVersion  = "v0.34.3"
-	versionResponse = []byte(fmt.Sprintf("jsonnet: %s\nkubecfg: %s", jsonnet.Version(), kubecfgVersion))
+	versionResponse = []byte(fmt.Sprintf("jsonnet: %s kubecfg: %s", jsonnet.Version(), kubecfgVersion))
 )
 
 // Health indicates whether the server is running.
