@@ -60,7 +60,7 @@ func main() {
 	slog.Info("Listening on", "address", bindAddress)
 	go func() {
 		if err := playground.Serve(); err != http.ErrServerClosed {
-			slog.Error("Unexpected shutdown: %w", err)
+			slog.Error("Unexpected shutdown", slog.Any("error", err))
 		}
 	}()
 
@@ -72,7 +72,7 @@ func main() {
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := playground.Server.Shutdown(timeoutCtx); err != nil {
-		slog.Error("Server forced shutdown: %w", err)
+		slog.Error("Server forced shutdown", slog.Any("error", err))
 	}
 
 	slog.Info("Server shutdown")
