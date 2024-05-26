@@ -9,7 +9,7 @@ import (
 )
 
 func TestEvaluateSnippet(t *testing.T) {
-	s := state.New("")
+	s := state.New("127.0.0.1", "")
 
 	eval, _ := s.EvaluateSnippet("{}")
 	assert.Equal(t, "{ }\n", eval)
@@ -20,7 +20,7 @@ func TestEvaluateSnippet(t *testing.T) {
 }
 
 func TestEvaluateKubecfg(t *testing.T) {
-	s := state.New("")
+	s := state.New("127.0.0.1", "")
 
 	f, _ := os.ReadFile("../../../testdata/kubecfg.jsonnet")
 
@@ -30,7 +30,7 @@ func TestEvaluateKubecfg(t *testing.T) {
 }
 
 func TestFormat(t *testing.T) {
-	s := state.New("")
+	s := state.New("127.0.0.1", "")
 
 	eval, _ := s.FormatSnippet(`{hello:"world"}`)
 	assert.Equal(t, eval, "{ hello: 'world' }\n")

@@ -17,12 +17,12 @@ import (
 const PlaygroundFile = "play.jsonnet"
 
 // New creates a new default State
-func New(shareAddress string) *State {
-	return NewWithLogger(shareAddress, slog.Default())
+func New(bindAddress, shareAddress string) *State {
+	return NewWithLogger(bindAddress, shareAddress, slog.Default())
 }
 
 // NewWithLogger creates a new default State
-func NewWithLogger(shareAddress string, logger *slog.Logger) *State {
+func NewWithLogger(bindAddress, shareAddress string, logger *slog.Logger) *State {
 	vm, _ := kubecfg.JsonnetVM()
 	return &State{
 		Store:  make(map[string]string),
@@ -30,6 +30,7 @@ func NewWithLogger(shareAddress string, logger *slog.Logger) *State {
 		Hasher: sha512.New(),
 		Config: &Config{
 			ShareDomain: shareAddress,
+			Address:     bindAddress,
 		},
 		Logger: logger,
 	}
@@ -69,6 +70,10 @@ func (s *State) FormatSnippet(snippet string) (string, error) {
 
 // Config contains server configuration
 type Config struct {
+
+	// Server address binding
+	Address string
+
 	// ShareDomain is used for the share functionality. The shareable hash is
 	// appended to this value.
 	//

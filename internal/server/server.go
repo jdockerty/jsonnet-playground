@@ -13,7 +13,17 @@ import (
 
 // The playground server
 type PlaygroundServer struct {
-	State *state.State
+	Server http.Server
+	State  *state.State
+}
+
+func New(state *state.State) *PlaygroundServer {
+	return &PlaygroundServer{
+		State: state,
+		Server: http.Server{
+			Addr: state.Config.Address,
+		},
+	}
 }
 
 // Load the available routes for the server
@@ -42,10 +52,10 @@ func (srv *PlaygroundServer) Routes() error {
 }
 
 // Serve will listen on the provided address, running the server.
-func (srv *PlaygroundServer) Serve(address string) error {
+func (srv *PlaygroundServer) Serve() error {
 	err := srv.Routes()
 	if err != nil {
 		return fmt.Errorf("unable to serve: %w", err)
 	}
-	return http.ListenAndServe(address, nil)
+	return srv.Server.ListenAndServe()
 }
