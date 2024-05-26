@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/jdockerty/jsonnet-playground/internal/server"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
@@ -41,15 +45,30 @@ func parseLogLevel(level string) slog.Level {
 }
 
 func main() {
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 	bindAddress := fmt.Sprintf("%s:%d", host, port)
 	logLevel := parseLogLevel(logLevel)
 	log.Println("Log level set to", logLevel)
+
 	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel}))
-	state := state.NewWithLogger(shareAddress, logger)
-	playground := &server.PlaygroundServer{
-		State: state,
-	}
+	state := state.NewWithLogger(bindAddress, shareAddress, logger)
+	playground := server.New(state)
 
 	slog.Info("Listening on", "address", bindAddress)
-	log.Fatal(playground.Serve(bindAddress))
+	go func() { log.Fatal(playground.Serve()) }()
+
+	<-ctx.Done()
+	stop()
+	slog.Info("Shutting down, use Ctrl+C again to force")
+
+	// Inform the server that it had 5 seconds to handle connections and shutdown
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := playground.Server.Shutdown(timeoutCtx); err != nil {
+		slog.Error("Server forced shutdown: %w", err)
+	}
+
+	slog.Info("Server shutdown")
 }

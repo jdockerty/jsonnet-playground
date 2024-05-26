@@ -49,7 +49,7 @@ func TestHandleRun(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/run", nil)
 		req.PostForm = data
 
-		handler := routes.HandleRun(state.New("https://example.com"))
+		handler := routes.HandleRun(state.New("127.0.0.1", "https://example.com"))
 		handler.ServeHTTP(rec, req)
 
 		if tc.shouldFail {
@@ -87,7 +87,7 @@ func TestHandleCreateShare(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/share", nil)
 		req.PostForm = data
 
-		handler := routes.HandleCreateShare(state.New("https://example.com"))
+		handler := routes.HandleCreateShare(state.New("127.0.0.1", "https://example.com"))
 		handler.ServeHTTP(rec, req)
 
 		if tc.shouldFail {
@@ -102,7 +102,7 @@ func TestHandleCreateShare(t *testing.T) {
 
 func TestHandleGetShare(t *testing.T) {
 	assert := assert.New(t)
-	s := state.New("https://example.com")
+	s := state.New("127.0.0.1", "https://example.com")
 	snippet := "{hello: 'world'}"
 	snippetHash := hex.EncodeToString(sha512.New().Sum([]byte(snippet)))[:15]
 
@@ -132,7 +132,7 @@ func TestHandleGetShare(t *testing.T) {
 
 func TestHandleVersions(t *testing.T) {
 	assert := assert.New(t)
-	s := state.New("https://example.com")
+	s := state.New("127.0.0.1", "https://example.com")
 
 	handler := routes.HandleVersions(s)
 	rec := httptest.NewRecorder()
