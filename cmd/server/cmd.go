@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -57,7 +58,11 @@ func main() {
 	playground := server.New(state)
 
 	slog.Info("Listening on", "address", bindAddress)
-	go func() { log.Fatal(playground.Serve()) }()
+	go func() {
+		if err := playground.Serve(); err != http.ErrServerClosed {
+			slog.Error("Unexpected shutdown: %w", err)
+		}
+	}()
 
 	<-ctx.Done()
 	stop()

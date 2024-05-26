@@ -15,8 +15,6 @@ import (
 type PlaygroundServer struct {
 	Server http.Server
 	State  *state.State
-
-	mux http.ServeMux
 }
 
 func New(state *state.State) *PlaygroundServer {
