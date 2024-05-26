@@ -37,17 +37,17 @@ func (srv *PlaygroundServer) Routes() error {
 	// Frontend routes
 	rootPage := components.RootPage("")
 	fs := http.FileServer(http.Dir(path))
-	srv.mux.Handle("/assets/", routes.HandleAssets("/assets/", fs))
-	srv.mux.Handle("/", templ.Handler(rootPage))
-	srv.mux.HandleFunc("/share/{shareHash}", routes.HandleShare(srv.State))
+	http.Handle("/assets/", routes.HandleAssets("/assets/", fs))
+	http.Handle("/", templ.Handler(rootPage))
+	http.HandleFunc("/share/{shareHash}", routes.HandleShare(srv.State))
 
 	// Backend/API routes
-	srv.mux.HandleFunc("/api/health", routes.Health(srv.State))
-	srv.mux.HandleFunc("/api/run", routes.DisableFileImports(srv.State, routes.HandleRun(srv.State)))
-	srv.mux.HandleFunc("/api/format", routes.DisableFileImports(srv.State, routes.HandleFormat(srv.State)))
-	srv.mux.HandleFunc("/api/share", routes.DisableFileImports(srv.State, routes.HandleCreateShare(srv.State)))
-	srv.mux.HandleFunc("/api/share/{shareHash}", routes.DisableFileImports(srv.State, routes.HandleGetShare(srv.State)))
-	srv.mux.HandleFunc("/api/versions", routes.HandleVersions(srv.State))
+	http.HandleFunc("/api/health", routes.Health(srv.State))
+	http.HandleFunc("/api/run", routes.DisableFileImports(srv.State, routes.HandleRun(srv.State)))
+	http.HandleFunc("/api/format", routes.DisableFileImports(srv.State, routes.HandleFormat(srv.State)))
+	http.HandleFunc("/api/share", routes.DisableFileImports(srv.State, routes.HandleCreateShare(srv.State)))
+	http.HandleFunc("/api/share/{shareHash}", routes.DisableFileImports(srv.State, routes.HandleGetShare(srv.State)))
+	http.HandleFunc("/api/versions", routes.HandleVersions(srv.State))
 	return nil
 }
 
