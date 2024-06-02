@@ -7,7 +7,6 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/jdockerty/jsonnet-playground/internal/components"
-	"github.com/jdockerty/jsonnet-playground/internal/server/routes"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
