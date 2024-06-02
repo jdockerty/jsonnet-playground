@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/jdockerty/jsonnet-playground/internal/components"
