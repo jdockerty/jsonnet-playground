@@ -1,4 +1,4 @@
-package routes_test
+package server_test
 
 import (
 	"crypto/sha512"
@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/go-jsonnet"
-	"github.com/jdockerty/jsonnet-playground/internal/server/routes"
+	"github.com/jdockerty/jsonnet-playground/internal/server"
 	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 	"github.com/kubecfg/kubecfg/pkg/kubecfg"
 	"github.com/stretchr/testify/assert"
@@ -33,9 +33,9 @@ func TestHandleRun(t *testing.T) {
 		expected   string
 		shouldFail bool
 	}{
-		{name: "hello-world", input: "{hello: 'world'}", expected: "../../../testdata/hello-world.json", shouldFail: false},
-		{name: "blank", input: "{}", expected: "../../../testdata/blank.json", shouldFail: false},
-		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{myVeryNestedObj:: { foo: { bar: { baz: { qux: 'some-val' }}}}, hasValue: kubecfg.objectHasPathAll($.myVeryNestedObj, 'foo.bar.baz.qux')}", expected: "../../../testdata/kubecfg.json", shouldFail: false},
+		{name: "hello-world", input: "{hello: 'world'}", expected: "../../testdata/hello-world.json", shouldFail: false},
+		{name: "blank", input: "{}", expected: "../../testdata/blank.json", shouldFail: false},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{myVeryNestedObj:: { foo: { bar: { baz: { qux: 'some-val' }}}}, hasValue: kubecfg.objectHasPathAll($.myVeryNestedObj, 'foo.bar.baz.qux')}", expected: "../../testdata/kubecfg.json", shouldFail: false},
 		{name: "invalid-jsonnet", input: "{", expected: "Invalid Jsonnet", shouldFail: true},
 		{name: "invalid-jsonnet-2", input: "{hello:}", expected: "Invalid Jsonnet", shouldFail: true},
 		{name: "file-import-jsonnet", input: "local f = import 'file:///proc/self/environ'; error 'test' + f", expected: "File imports are disabled", shouldFail: true},
@@ -49,7 +49,8 @@ func TestHandleRun(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/run", nil)
 		req.PostForm = data
 
-		handler := routes.HandleRun(state.New("127.0.0.1", "https://example.com"))
+		srv := server.New(state.New("127.0.0.1", "https://example.com"))
+		handler := srv.HandleRun()
 		handler.ServeHTTP(rec, req)
 
 		if tc.shouldFail {
@@ -87,7 +88,8 @@ func TestHandleCreateShare(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/share", nil)
 		req.PostForm = data
 
-		handler := routes.HandleCreateShare(state.New("127.0.0.1", "https://example.com"))
+		srv := server.New(state.New("127.0.0.1", "https://example.com"))
+		handler := srv.HandleCreateShare()
 		handler.ServeHTTP(rec, req)
 
 		if tc.shouldFail {
@@ -107,7 +109,8 @@ func TestHandleGetShare(t *testing.T) {
 	snippetHash := hex.EncodeToString(sha512.New().Sum([]byte(snippet)))[:15]
 
 	// Get non-existent snippet
-	handler := routes.HandleGetShare(s)
+	srv := server.New(s)
+	handler := srv.HandleGetShare()
 	path := fmt.Sprintf("/api/share/%s", snippetHash)
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", path, nil)
@@ -117,10 +120,10 @@ func TestHandleGetShare(t *testing.T) {
 
 	// Add snippet to store
 	evaluated, _ := vm.EvaluateAnonymousSnippet("", snippet)
-	s.Store[snippetHash] = evaluated
+	srv.State.Store[snippetHash] = evaluated
 
 	// Get snippet which has been added
-	handler = routes.HandleGetShare(s)
+	handler = srv.HandleGetShare()
 	rec = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", fmt.Sprintf("/api/share/%s", snippetHash), nil)
 	req.SetPathValue("shareHash", snippetHash)
@@ -134,10 +137,11 @@ func TestHandleVersions(t *testing.T) {
 	assert := assert.New(t)
 	s := state.New("127.0.0.1", "https://example.com")
 
-	handler := routes.HandleVersions(s)
+	srv := server.New(s)
+	handler := srv.HandleVersions()
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/api/versions", nil)
 	handler.ServeHTTP(rec, req)
 
-	assert.Contains(rec.Body.String(), string(routes.VersionResponse))
+	assert.Contains(rec.Body.String(), string(server.VersionResponse))
 }

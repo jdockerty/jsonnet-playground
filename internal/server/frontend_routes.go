@@ -1,12 +1,10 @@
-package routes
+package server
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/jdockerty/jsonnet-playground/internal/components"
-	"github.com/jdockerty/jsonnet-playground/internal/server/state"
 )
 
 // HandleAssets wires up the static asset handling for the server.
@@ -15,17 +13,16 @@ func HandleAssets(pattern string, fsHandler http.Handler) http.Handler {
 }
 
 // HandleShare is the rendering of the shared snippet view.
-func HandleShare(state *state.State) http.HandlerFunc {
+func (srv *PlaygroundServer) HandleShare() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		shareHash := r.PathValue("shareHash")
-		log.Printf("Incoming share view for %+v\n", shareHash)
+		srv.State.Logger.Info("share view loading", "shareHash", shareHash)
 
 		if shareHash == "" {
-			log.Println("Browsed to share with no hash, rendering root page")
+			srv.State.Logger.Debug("browse to share with no hash, rendering root page")
 			_ = components.RootPage("").Render(context.Background(), w)
 			return
 		}
-		log.Println("Rendering share page")
 		sharePage := components.RootPage(shareHash)
 		_ = sharePage.Render(context.Background(), w)
 	}

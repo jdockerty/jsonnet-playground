@@ -57,7 +57,7 @@ func main() {
 	state := state.NewWithLogger(bindAddress, shareAddress, logger)
 	playground := server.New(state)
 
-	slog.Info("Listening on", "address", bindAddress)
+	logger.Info("Listening on", "address", bindAddress)
 	go func() {
 		if err := playground.Serve(); err != http.ErrServerClosed {
 			slog.Error("Unexpected shutdown", slog.Any("error", err))
@@ -66,14 +66,14 @@ func main() {
 
 	<-ctx.Done()
 	stop()
-	slog.Info("Shutting down, use Ctrl+C again to force")
+	logger.Info("Shutting down, use Ctrl+C again to force")
 
 	// Inform the server that it had 5 seconds to handle connections and shutdown
 	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := playground.Server.Shutdown(timeoutCtx); err != nil {
-		slog.Error("Server forced shutdown", slog.Any("error", err))
+		logger.Error("Server forced shutdown", slog.Any("error", err))
 	}
 
-	slog.Info("Server shutdown")
+	logger.Info("Server shutdown")
 }
