@@ -17,14 +17,13 @@ func HandleAssets(pattern string, fsHandler http.Handler) http.Handler {
 func (srv *PlaygroundServer) HandleShare() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		shareHash := r.PathValue("shareHash")
-		log.Printf("Incoming share view for %+v\n", shareHash)
+		srv.State.Logger.Info("share view loading", "shareHash", shareHash)
 
 		if shareHash == "" {
-			log.Println("Browsed to share with no hash, rendering root page")
+			srv.State.Logger.Debug("browse to share with no hash, rendering root page")
 			_ = components.RootPage("").Render(context.Background(), w)
 			return
 		}
-		log.Println("Rendering share page")
 		sharePage := components.RootPage(shareHash)
 		_ = sharePage.Render(context.Background(), w)
 	}
