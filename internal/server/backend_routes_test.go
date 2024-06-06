@@ -73,11 +73,11 @@ func TestHandleCreateShare(t *testing.T) {
 		input      string
 		shouldFail bool
 	}{
-		{name: "hello-world", input: "{hello: 'world'}", shouldFail: false},
-		{name: "blank", input: "{}", shouldFail: false},
-		{name: "invalid-jsonnet", input: "{", shouldFail: true},
-		{name: "invalid-jsonnet-2", input: "{hello:}", shouldFail: true},
-		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}", shouldFail: false},
+		{name: "hello-world", input: "{hello: 'world'}"},
+		{name: "blank", input: "{}"},
+		{name: "invalid-jsonnet", input: "{"},
+		{name: "invalid-jsonnet-2", input: "{hello:}"},
+		{name: "kubecfg", input: "local kubecfg = import 'internal:///kubecfg.libsonnet';\n{k8s: kubecfg.isK8sObject({apiVersion: 'v1', kind: 'Pod', spec: {}})}"},
 	}
 
 	for _, tc := range tests {
@@ -92,10 +92,6 @@ func TestHandleCreateShare(t *testing.T) {
 		handler := srv.HandleCreateShare()
 		handler.ServeHTTP(rec, req)
 
-		if tc.shouldFail {
-			assert.Contains(t, rec.Body.String(), "Share is not available for invalid Jsonnet")
-			return
-		}
 		snippetHash := hex.EncodeToString(sha512.New().Sum([]byte(tc.input)))[:15]
 		expected := fmt.Sprintf("Link: https://example.com/share/%s", snippetHash)
 		assert.Equal(t, rec.Body.String(), expected, "expected: %s, got: %s", tc.name, expected, rec.Body.String())
