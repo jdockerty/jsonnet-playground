@@ -69,10 +69,7 @@ func (srv *PlaygroundServer) HandleCreateShare() http.HandlerFunc {
 		incomingJsonnet := r.FormValue("jsonnet-input")
 		_, err := srv.State.EvaluateSnippet(incomingJsonnet)
 		if err != nil {
-			srv.State.Logger.Error("invalid share", "jsonnet", incomingJsonnet)
-			// TODO: display an error for the bad req rather than using a 200
-			_, _ = w.Write([]byte("Share is not available for invalid Jsonnet. Run your snippet to see the result."))
-			return
+			srv.State.Logger.Error("invalid jsonnet for share", "jsonnet", incomingJsonnet)
 		}
 
 		snippetHash := hex.EncodeToString(srv.State.Hasher.Sum([]byte(incomingJsonnet)))[:15]
